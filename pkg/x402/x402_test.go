@@ -61,7 +61,6 @@ func TestX402HandshakeSignature(t *testing.T) {
 	if recoveredAddress != agentAddress {
 		t.Errorf("Recovered address %s does not match Agent address %s", recoveredAddress.Hex(), agentAddress.Hex())
 	} else {
-		fmt.Printf("✅ Handshake Verified: Agent %s authorized payment of 1.00 USDC on Base Sepolia
-", recoveredAddress.Hex())
+		fmt.Printf("✅ Handshake Verified: Agent %s authorized payment of 1.00 USDC on Base Sepolia\n", recoveredAddress.Hex())
 	}
 }
