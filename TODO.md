@@ -31,9 +31,13 @@ This document outlines the path toward a high-throughput, protocol-agnostic sett
 ## Phase 5: The "Qualifying" Flow (MVP) 🚀
 - [x] **settler-proxy:** Implement the x402 Reverse Proxy Gateway.
   - [x] Intercept unauthenticated requests.
-  - [x] Issue 402 Challenges.
+  - [x] Issue 402 Challenges (Instruction Builder implemented).
   - [ ] Support for EIP-3009 payload injection.
   - [x] Proxy authorized requests to backend services.
+- [x] **Distribution:**
+  - [x] Anyisland integration (Manifest, Pulse, Registration).
+  - [x] Docker/Podman support.
+  - [x] Single binary build structure.
 - [x] **settlerd:** The Facilitator Daemon.
   - [x] Manage long-lived settlement state (SQLite persistence).
   - [x] Multi-chain RPC management.
