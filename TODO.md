@@ -9,15 +9,15 @@ This document outlines the path toward a high-throughput, protocol-agnostic sett
 - [x] Basic `Money` value object and `Invoice` aggregate
 
 ## Phase 2: x402 Protocol Implementation (`pkg/x402`) 💸
-- [ ] **PaymentDescriptor:** Define standard JSON structures for 402 responses (amount, asset, network, recipient).
-- [ ] **State Machine:** Implement the HTTP 402 "Payment Required" lifecycle.
-- [ ] **Header Parser:** Logic to extract and decode `X-PAYMENT` or `Payment-Signature` headers.
-- [ ] **Nonce Manager:** Cryptographic challenge (session ID) generator to prevent replay attacks.
+- [x] **PaymentDescriptor:** Define standard JSON structures for 402 responses (amount, asset, network, recipient).
+- [x] **State Machine:** Implement the HTTP 402 "Payment Required" lifecycle.
+- [x] **Header Parser:** Logic to extract and decode `X-PAYMENT` or `Payment-Signature` headers.
+- [x] **Nonce Manager:** Cryptographic challenge (session ID) generator to prevent replay attacks.
 
 ## Phase 3: Technical Heart - Verification (`pkg/crypto`) 🔐
-- [ ] **EIP-712 Implementation:** Define the SettlerEngine Domain Separator and standard signature format.
-- [ ] **Signature Recovery:** Implementation of signature recovery to verify agent wallet addresses.
-- [ ] **Stateless Authorization:** Logic to verify "Intent to Pay" without heavy database dependencies.
+- [x] **EIP-712 Implementation:** Define the SettlerEngine Domain Separator and standard signature format.
+- [x] **Signature Recovery:** Implementation of signature recovery to verify agent wallet addresses.
+- [x] **Stateless Authorization:** Logic to verify "Intent to Pay" without heavy database dependencies.
 
 ## Phase 4: Chain Observer & Settlement (`pkg/chains`) ⛓️
 - [ ] **Unified RPC Multi-Client:** Support for Base, Cronos, SKALE, Avalanche, and Polygon.
