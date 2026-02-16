@@ -3,6 +3,7 @@ go 1.25.5
 use (
 	./apps/settler-proxy
 	./apps/settlerd
+	./cmd/settler
 	./core
 	./pkg
 )

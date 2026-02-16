@@ -1,0 +1,11 @@
+.git
+.github
+docs
+node_modules
+*.log
+tmp/
+.gemini/
+.gitignore
+TODO.md
+AGENTS.md
+ARCHITECTURE.md
