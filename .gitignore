@@ -1,1 +1,7 @@
-/bin/\n/vendor/\n.DS_Store\n*.log
+bin/
+vendor/
+.DS_Store
+*.log
+*.exe
+*.test
+*.prof
