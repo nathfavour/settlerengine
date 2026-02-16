@@ -21,8 +21,10 @@ This document outlines the path toward a high-throughput, protocol-agnostic sett
 
 ## Phase 4: Chain Observer & Settlement (`pkg/chains`) ⛓️
 - [ ] **Unified RPC Multi-Client:** Support for Base, Cronos, SKALE, Avalanche, and Polygon.
+- [ ] **RPC Redundancy:** Implement fallback mechanism (dRPC/Thirdweb) for rate-limiting protection.
 - [ ] **Chain Configuration:** Mapping of ChainID to x402 Facilitator/USDC contract addresses.
 - [ ] **EIP-3009 Integration:** Implement `transferWithAuthorization` support for gasless USDC transfers.
+  - [ ] Specific verification against Base Sepolia (`0x036CbD...`) and Cronos zkEVM (`0xaa5b8...`).
 - [ ] **Non-Custodial Sweeper:** Logic to ensure funds route directly to merchants.
 - [ ] **Transaction Verifier:** Confirm on-chain transfers match the issued challenges.
 
