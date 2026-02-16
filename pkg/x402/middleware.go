@@ -2,6 +2,7 @@ package x402
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -63,7 +64,11 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 					// TODO: Add the recovered signer address to context if needed
 					next.ServeHTTP(w, r)
 					return
+				} else if err != nil {
+					fmt.Printf("Signature verification failed: %v\n", err)
 				}
+			} else {
+				fmt.Printf("Nonce verification failed: %s\n", payload.Intent.Nonce)
 			}
 		}
 
