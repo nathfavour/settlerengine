@@ -1,12 +1,12 @@
 package crypto
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 )
@@ -17,7 +17,7 @@ type IntentToPay struct {
 	Amount    string `json:"amount"`    // Amount in atomic units (uint256 string)
 	Asset     string `json:"asset"`     // Token contract address (USDC)
 	Nonce     string `json:"nonce"`     // Unique session UUID to prevent replay
-	Deadline  int64  `json:"deadline"`  // Unix timestamp for signature expiry
+	Deadline  uint64 `json:"deadline"`  // Unix timestamp for signature expiry
 }
 
 // DomainParams defines the parameters for the EIP-712 domain separator.
@@ -41,14 +41,14 @@ func VerifyIntentToPay(intent IntentToPay, signature string, params DomainParams
 				{Name: "amount", Type: "uint256"},
 				{Name: "asset", Type: "address"},
 				{Name: "nonce", Type: "string"},
-				{Name: "deadline", Type: "int64"},
+				{Name: "deadline", Type: "uint256"},
 			},
 		},
 		PrimaryType: "IntentToPay",
 		Domain: apitypes.TypedDataDomain{
 			Name:              "SettlerEngine",
 			Version:           "1",
-			ChainId:           (*hexutil.Big)(params.ChainID),
+			ChainId:           (*math.HexOrDecimal256)(params.ChainID),
 			VerifyingContract: params.VerifyingContract.Hex(),
 		},
 		Message: apitypes.TypedDataMessage{
@@ -56,7 +56,7 @@ func VerifyIntentToPay(intent IntentToPay, signature string, params DomainParams
 			"amount":    intent.Amount,
 			"asset":     intent.Asset,
 			"nonce":     intent.Nonce,
-			"deadline":  intent.Deadline,
+			"deadline":  (*math.HexOrDecimal256)(big.NewInt(int64(intent.Deadline))),
 		},
 	}
 

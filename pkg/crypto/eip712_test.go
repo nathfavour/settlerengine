@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 )
@@ -53,7 +54,7 @@ func TestVerifyIntentToPay(t *testing.T) {
 		Domain: apitypes.TypedDataDomain{
 			Name:              "SettlerEngine",
 			Version:           "1",
-			ChainId:           (*hexutil.Big)(params.ChainID),
+			ChainId:           (*math.HexOrDecimal256)(params.ChainID),
 			VerifyingContract: params.VerifyingContract.Hex(),
 		},
 		Message: apitypes.TypedDataMessage{
