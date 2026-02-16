@@ -2,7 +2,10 @@ module github.com/nathfavour/settlerengine/pkg
 
 go 1.24.0
 
-require github.com/ethereum/go-ethereum v1.16.8
+require (
+	github.com/ethereum/go-ethereum v1.16.8
+	modernc.org/sqlite v1.45.0
+)
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -28,12 +31,11 @@ require (
 	github.com/supranational/blst v0.3.16-0.20250831170142-f48500c1fdbe // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
 	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 	modernc.org/libc v1.67.6 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
-	modernc.org/sqlite v1.45.0 // indirect
 )
