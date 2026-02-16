@@ -70,7 +70,11 @@ func VerifyIntentToPay(intent IntentToPay, signature string, params DomainParams
 		return common.Address{}, fmt.Errorf("failed to hash message: %w", err)
 	}
 
-	rawData := []byte(fmt.Sprintf("\x19\x01%s%s", string(domainSeparator), string(typedDataHash)))
+	rawData := make([]byte, 2+32+32)
+	rawData[0] = 0x19
+	rawData[1] = 0x01
+	copy(rawData[2:34], domainSeparator)
+	copy(rawData[34:66], typedDataHash)
 	sighash := crypto.Keccak256(rawData)
 
 	sig, err := hexutil.Decode(signature)

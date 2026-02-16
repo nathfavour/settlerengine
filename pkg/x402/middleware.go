@@ -3,6 +3,7 @@ package x402
 import (
 	"encoding/json"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/nathfavour/settlerengine/pkg/crypto"
