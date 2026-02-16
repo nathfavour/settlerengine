@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
@@ -21,7 +20,7 @@ function HomepageHeader() {
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            Docusaurus Tutorial - 5min ⏱️
+            Get Started with SettlerEngine
           </Link>
         </div>
       </div>
@@ -33,11 +32,13 @@ export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title={`${siteConfig.title}`}
+      description="The Payment Engine for the Agentic Era">
       <HomepageHeader />
       <main>
-        <HomepageFeatures />
+        <div className="container text--center padding-vert--xl">
+          <p>SettlerEngine is designed as a protocol-agnostic settlement layer for autonomous AI agents and modern commerce.</p>
+        </div>
       </main>
     </Layout>
   );
