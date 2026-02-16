@@ -120,13 +120,17 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 			Status:      http.StatusPaymentRequired,
 			Title:       "Payment Required",
 			Description: "This resource requires a valid x402 payment signature.",
-			Payment: PaymentDescriptor{
-				Amount:    amount,
-				Asset:     asset,
-				Network:   m.config.DomainParams.ChainID.String(),
-				Recipient: recipient,
-				Nonce:     nonce,
+			Accepts: []PaymentDescriptor{
+				{
+					Scheme:  "x402",
+					Price:   amount,
+					Asset:   asset,
+					Network: m.config.DomainParams.ChainID.String(),
+					PayTo:   recipient,
+					Nonce:   nonce,
+				},
 			},
+			Resource: r.URL.Path,
 		}
 
 		w.Header().Set("Content-Type", "application/json")

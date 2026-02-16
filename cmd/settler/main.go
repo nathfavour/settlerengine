@@ -12,16 +12,25 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/nathfavour/settlerengine/pkg/anyisland"
 	"github.com/nathfavour/settlerengine/pkg/crypto"
 	"github.com/nathfavour/settlerengine/pkg/storage"
 	"github.com/nathfavour/settlerengine/pkg/uds"
 	"github.com/nathfavour/settlerengine/pkg/x402"
 )
 
+const Version = "0.1.0"
+
 func main() {
 	if len(os.Args) < 2 {
 		printUsage()
 		os.Exit(1)
+	}
+
+	// Anyisland Integration
+	_ = anyisland.Register("settler", Version)
+	if pulse, err := anyisland.CheckManaged(); err == nil && pulse.Status == "MANAGED" {
+		log.Printf("🏝️  Anyisland: Managed by %s", pulse.AnyislandVersion)
 	}
 
 	switch os.Args[1] {

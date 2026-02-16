@@ -49,11 +49,15 @@ func TestMiddleware_402Challenge(t *testing.T) {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
 
-	if resp.Payment.Amount != "100" {
-		t.Errorf("expected amount 100, got %s", resp.Payment.Amount)
+	if len(resp.Accepts) == 0 {
+		t.Fatal("expected at least one payment descriptor in Accepts")
 	}
 
-	if resp.Payment.Nonce == "" {
+	if resp.Accepts[0].Price != "100" {
+		t.Errorf("expected price 100, got %s", resp.Accepts[0].Price)
+	}
+
+	if resp.Accepts[0].Nonce == "" {
 		t.Error("expected nonce in response")
 	}
 }
@@ -84,7 +88,10 @@ func TestMiddleware_Authorized(t *testing.T) {
 
 	var challenge ChallengeResponse
 	json.Unmarshal(rr1.Body.Bytes(), &challenge)
-	nonce := challenge.Payment.Nonce
+	if len(challenge.Accepts) == 0 {
+		t.Fatal("expected at least one payment descriptor in challenge response")
+	}
+	nonce := challenge.Accepts[0].Nonce
 
 	// Sign the intent
 	intent := crypto2.IntentToPay{
