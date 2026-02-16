@@ -47,7 +47,7 @@ func TestVerifyIntentToPay(t *testing.T) {
 				{Name: "amount", Type: "uint256"},
 				{Name: "asset", Type: "address"},
 				{Name: "nonce", Type: "string"},
-				{Name: "deadline", Type: "int64"},
+				{Name: "deadline", Type: "uint256"},
 			},
 		},
 		PrimaryType: "IntentToPay",
@@ -62,7 +62,7 @@ func TestVerifyIntentToPay(t *testing.T) {
 			"amount":    intent.Amount,
 			"asset":     intent.Asset,
 			"nonce":     intent.Nonce,
-			"deadline":  intent.Deadline,
+			"deadline":  (*math.HexOrDecimal256)(big.NewInt(int64(intent.Deadline))),
 		},
 	}
 
