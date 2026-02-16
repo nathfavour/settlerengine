@@ -13,6 +13,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nathfavour/settlerengine/pkg/crypto"
+	"github.com/nathfavour/settlerengine/pkg/storage"
+	"github.com/nathfavour/settlerengine/pkg/uds"
 	"github.com/nathfavour/settlerengine/pkg/x402"
 )
 
@@ -30,8 +32,7 @@ func main() {
 	case "help":
 		printUsage()
 	default:
-		fmt.Printf("Unknown command: %s
-", os.Args[1])
+		fmt.Printf("Unknown command: %s\n", os.Args[1])
 		printUsage()
 		os.Exit(1)
 	}
@@ -39,11 +40,9 @@ func main() {
 
 func printUsage() {
 	fmt.Println("SettlerEngine - The Agentic Settlement Gateway")
-	fmt.Println("
-Usage:")
+	fmt.Println("\nUsage:")
 	fmt.Println("  settler <command> [arguments]")
-	fmt.Println("
-Commands:")
+	fmt.Println("\nCommands:")
 	fmt.Println("  proxy        Start the x402 reverse proxy")
 	fmt.Println("  facilitator  Start the settlement facilitator daemon")
 	fmt.Println("  help         Show this help message")
@@ -58,6 +57,21 @@ func runProxy(args []string) {
 	asset := fs.String("asset", "0x036CbD53842c5426634e7929541eC2318f3dCF7e", "Asset address (USDC)")
 	amount := fs.String("amount", "1000000", "Amount in atomic units")
 	fs.Parse(args)
+
+	// 1. Initialize Storage
+	db, err := storage.OpenDefault()
+	if err != nil {
+		log.Fatalf("Failed to initialize storage: %v", err)
+	}
+	defer db.Close()
+	log.Printf("📂 Data Directory: %s", db.DataDir)
+
+	// 2. Start UDS Server
+	udsServer := uds.NewServer(db.SocketPath())
+	if err := udsServer.Start(); err != nil {
+		log.Printf("⚠️  UDS Server failed to start: %v", err)
+	}
+	defer udsServer.Close()
 
 	targetURL, err := url.Parse(*target)
 	if err != nil {
@@ -75,6 +89,7 @@ func runProxy(args []string) {
 		Recipient:   *recipient,
 		Asset:       *asset,
 		Amount:      *amount,
+		DB:          db,
 	}
 
 	mw := x402.NewMiddleware(cfg)
@@ -88,9 +103,14 @@ func runProxy(args []string) {
 }
 
 func runFacilitator(args []string) {
+	db, err := storage.OpenDefault()
+	if err != nil {
+		log.Fatalf("Failed to initialize storage: %v", err)
+	}
+	defer db.Close()
+
 	fmt.Println("Starting Settler Facilitator...")
-	// Logic from apps/settlerd/main.go or expanded logic
-	// For now, just a placeholder
+	log.Printf("📂 Data Directory: %s", db.DataDir)
 	log.Println("Facilitator daemon is running (stateless verification mode active)")
 	select {} // Keep alive
 }

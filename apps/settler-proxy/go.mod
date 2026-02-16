@@ -1,6 +1,6 @@
 module github.com/nathfavour/settlerengine/apps/settler-proxy
 
-go 1.25.5
+go 1.24.0
 
 require (
 	github.com/ethereum/go-ethereum v1.16.8

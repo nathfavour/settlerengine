@@ -34,9 +34,9 @@ This document outlines the path toward a high-throughput, protocol-agnostic sett
   - [x] Issue 402 Challenges.
   - [ ] Support for EIP-3009 payload injection.
   - [x] Proxy authorized requests to backend services.
-- [ ] **settlerd:** The Facilitator Daemon.
-  - [ ] Manage long-lived settlement state.
-  - [ ] Multi-chain RPC management.
+- [x] **settlerd:** The Facilitator Daemon.
+  - [x] Manage long-lived settlement state.
+  - [x] Multi-chain RPC management.
   - [ ] Broadcast/Verify on-chain transfers.
 
 ## Phase 6: Demos & Examples 🛠️

@@ -9,6 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nathfavour/settlerengine/pkg/crypto"
+	"github.com/nathfavour/settlerengine/pkg/storage"
 )
 
 type contextKey string
@@ -25,6 +26,7 @@ type Config struct {
 	Asset         string
 	Amount        string
 	PriceResolver PriceResolver
+	DB            *storage.DB
 }
 
 // PriceResolver dynamically determines the payment requirements for a request.
@@ -62,11 +64,22 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 		// 1. Try to parse payment header
 		payload, err := ParseHeader(r)
 		if err == nil {
-			// 2. Check Cache (Idempotency)
+			// 2. Check Cache & DB (Idempotency)
 			if addr, ok := m.verified.Load(payload.Signature); ok {
 				ctx := context.WithValue(r.Context(), SignerContextKey, addr.(common.Address))
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
+			}
+
+			if m.config.DB != nil {
+				signer, err := m.config.DB.CheckPayment(payload.Signature)
+				if err == nil && signer != "" {
+					recovered := common.HexToAddress(signer)
+					m.verified.Store(payload.Signature, recovered)
+					ctx := context.WithValue(r.Context(), SignerContextKey, recovered)
+					next.ServeHTTP(w, r.WithContext(ctx))
+					return
+				}
 			}
 
 			// 3. Validate Nonce
@@ -76,6 +89,16 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 				if err == nil && recovered.Hex() != "" {
 					// Authorized!
 					m.verified.Store(payload.Signature, recovered)
+
+					if m.config.DB != nil {
+						_ = m.config.DB.RecordPayment(
+							payload.Signature,
+							recovered.Hex(),
+							payload.Intent.Amount,
+							payload.Intent.Asset,
+							payload.Intent.Nonce,
+						)
+					}
 					
 					ctx := context.WithValue(r.Context(), SignerContextKey, recovered)
 					next.ServeHTTP(w, r.WithContext(ctx))

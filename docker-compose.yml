@@ -1,0 +1,14 @@
+services:
+  settler-proxy:
+    build: .
+    ports:
+      - "8080:8080"
+    command: ["proxy", "-target", "http://mock-backend:8081", "-listen", ":8080"]
+    depends_on:
+      - mock-backend
+
+  mock-backend:
+    image: python:3.9-slim
+    command: python3 -m http.server 8081
+    ports:
+      - "8081:8081"
