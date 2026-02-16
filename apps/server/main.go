@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/nathfavour/settlerengine/core/internal/domain/model"
+	"github.com/nathfavour/settlerengine/core/domain/model"
 	"github.com/nathfavour/settlerengine/core/pkg/money"
 	"math/big"
 )
