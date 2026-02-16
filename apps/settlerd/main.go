@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/big"
 
 	"github.com/nathfavour/settlerengine/core/domain/model"
-	"github.com/nathfavour/settlerengine/core/pkg/money"
-	"math/big"
+	"github.com/nathfavour/settlerengine/pkg/money"
 )
 
 func main() {
