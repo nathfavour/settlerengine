@@ -23,3 +23,17 @@ We prioritize chains that support **EIP-3009** (`transferWithAuthorization`), al
 ## Engineering Directive
 
 For all EVM chains, SettlerEngine uses **USDC** (implementing EIP-3009) to bypass the allowance bottleneck, ensuring a frictionless payment experience for AI agents.
+
+## Testnet Configuration
+
+For integration testing, use the following network parameters:
+
+### Base Sepolia
+- **Chain ID:** 84532
+- **RPC:** `https://sepolia.base.org`
+- **USDC Address:** `0x036CbD53842c5426634e7929541eC2318f3dCF7e`
+
+### Cronos zkEVM (Testnet)
+- **Chain ID:** 240
+- **RPC:** `https://cronos-zkevm-testnet.drpc.org`
+- **USDC Address:** `0xaa5b845F8C9c047779bEDf64829601d8B264076c`
