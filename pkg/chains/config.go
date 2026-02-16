@@ -27,6 +27,13 @@ type ChainConfig struct {
 
 func init() {
 	RegisterChain(ChainConfig{
+		Name:        "Base",
+		ChainID:     ChainIDBase,
+		RPCURL:      "https://mainnet.base.org",
+		USDCAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+		ExplorerURL: "https://basescan.org",
+	})
+	RegisterChain(ChainConfig{
 		Name:        "Base Sepolia",
 		ChainID:     ChainIDBaseSepolia,
 		RPCURL:      "https://sepolia.base.org",
@@ -39,6 +46,20 @@ func init() {
 		RPCURL:      "https://cronos-zkevm-testnet.drpc.org",
 		USDCAddress: "0xaa5b845F8C9c047779bEDf64829601d8B264076c",
 		ExplorerURL: "https://explorer.zkevm.cronos.org/testnet/",
+	})
+	RegisterChain(ChainConfig{
+		Name:        "Avalanche",
+		ChainID:     ChainIDAvalanche,
+		RPCURL:      "https://api.avax.network/ext/bc/C/rpc",
+		USDCAddress: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
+		ExplorerURL: "https://snowtrace.io",
+	})
+	RegisterChain(ChainConfig{
+		Name:        "Polygon",
+		ChainID:     ChainIDPolygon,
+		RPCURL:      "https://polygon-rpc.com",
+		USDCAddress: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // Native USDC
+		ExplorerURL: "https://polygonscan.com",
 	})
 }
 

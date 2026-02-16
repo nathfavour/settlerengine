@@ -22,8 +22,8 @@ func TestMiddleware_402Challenge(t *testing.T) {
 			VerifyingContract: common.HexToAddress("0x0"),
 		},
 		NonceExpiry: 1 * time.Minute,
-		Recipient:   "0x123",
-		Asset:       "0x456",
+		Recipient:   "0x0000000000000000000000000000000000000123",
+		Asset:       "0x0000000000000000000000000000000000000456",
 		Amount:      "100",
 	}
 	mw := NewMiddleware(cfg)
@@ -72,7 +72,7 @@ func TestMiddleware_Authorized(t *testing.T) {
 		},
 		NonceExpiry: 1 * time.Minute,
 		Recipient:   agentAddr.Hex(), // Just for testing
-		Asset:       "0x456",
+		Asset:       "0x0000000000000000000000000000000000000456",
 		Amount:      "100",
 	}
 	mw := NewMiddleware(cfg)
