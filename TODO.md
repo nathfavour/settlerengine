@@ -20,7 +20,9 @@ This document outlines the path toward a high-throughput, protocol-agnostic sett
 - [ ] **Stateless Authorization:** Logic to verify "Intent to Pay" without heavy database dependencies.
 
 ## Phase 4: Chain Observer & Settlement (`pkg/chains`) ⛓️
-- [ ] **Unified RPC Multi-Client:** Support for Base, Cronos, and SKALE.
+- [ ] **Unified RPC Multi-Client:** Support for Base, Cronos, SKALE, Avalanche, and Polygon.
+- [ ] **Chain Configuration:** Mapping of ChainID to x402 Facilitator/USDC contract addresses.
+- [ ] **EIP-3009 Integration:** Implement `transferWithAuthorization` support for gasless USDC transfers.
 - [ ] **Non-Custodial Sweeper:** Logic to ensure funds route directly to merchants.
 - [ ] **Transaction Verifier:** Confirm on-chain transfers match the issued challenges.
 
@@ -28,9 +30,11 @@ This document outlines the path toward a high-throughput, protocol-agnostic sett
 - [ ] **settler-proxy:** Implement the x402 Reverse Proxy Gateway.
   - [ ] Intercept unauthenticated requests.
   - [ ] Issue 402 Challenges.
+  - [ ] Support for EIP-3009 payload injection.
   - [ ] Proxy authorized requests to backend services.
 - [ ] **settlerd:** The Facilitator Daemon.
   - [ ] Manage long-lived settlement state.
+  - [ ] Multi-chain RPC management.
   - [ ] Broadcast/Verify on-chain transfers.
 
 ## Phase 6: Demos & Examples 🛠️
