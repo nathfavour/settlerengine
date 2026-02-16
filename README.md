@@ -10,6 +10,30 @@ The Agentic Settlement Gateway for AI Agents and Human Users.
 
 ## Deployment
 
+### Local Integration (UDS & SQLite)
+SettlerEngine is designed for robust local agent communication using Unix Domain Sockets (UDS) and persistent storage via CGO-free SQLite.
+
+#### Data Directory
+By default, the engine uses the standard system configuration directory:
+- **Linux**: `~/.config/settlerengine/`
+- **macOS**: `~/Library/Application Support/settlerengine/`
+- **Windows**: `%AppData%\settlerengine\`
+
+This directory contains:
+- `settler.db`: SQLite database for persistent payment verification.
+- `settler.sock`: Unix Domain Socket for local process communication.
+
+#### Connecting via UDS
+Local agents can connect to the engine using the socket file. This is ideal for services running on the same machine that need to verify payments or request signatures without network overhead.
+
+Example (Go):
+```go
+conn, err := net.Dial("unix", "~/.config/settlerengine/settler.sock")
+```
+
+#### SQLite Persistence
+Verification states are stored in a CGO-free SQLite database. This ensures that even after a restart, previously verified payment intents remain valid, preventing redundant on-chain checks or 402 challenges.
+
 ### One Binary Build
 You can build the `settler` binary which contains both the proxy and the facilitator.
 ```bash

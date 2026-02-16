@@ -35,9 +35,13 @@ This document outlines the path toward a high-throughput, protocol-agnostic sett
   - [ ] Support for EIP-3009 payload injection.
   - [x] Proxy authorized requests to backend services.
 - [x] **settlerd:** The Facilitator Daemon.
-  - [x] Manage long-lived settlement state.
+  - [x] Manage long-lived settlement state (SQLite persistence).
   - [x] Multi-chain RPC management.
   - [ ] Broadcast/Verify on-chain transfers.
+- [x] **Local Integration:**
+  - [x] Unix Domain Socket (UDS) support for local agents.
+  - [x] OS-specific data directory resolution.
+  - [x] CGO-free SQLite implementation.
 
 ## Phase 6: Demos & Examples 🛠️
 - [ ] Example agent implementation (Python/TS) paying for an API.
