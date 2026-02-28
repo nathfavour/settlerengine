@@ -52,15 +52,18 @@ func main() {
 		log.Fatalf("Failed to initialize Riquid adapter: %v", err)
 	}
 
-	// 5. Initialize Settlement Engine
-	engine := service.NewDefaultSettlementEngine(db, mc, riquid)
+	// 5. Initialize Event Bus
+	bus := service.NewLocalBus()
 
-	// 6. Initialize Yield Service
+	// 6. Initialize Settlement Engine
+	engine := service.NewDefaultSettlementEngine(db, mc, riquid, bus)
+
+	// 7. Initialize Yield Service
 	// Threshold: 0.1 BNB (demonstration)
 	threshold := big.NewInt(100000000000000000) 
 	yieldSvc := service.NewYieldService(engine, riquid, threshold)
 
-	// 7. Start Background Worker for Harvesting
+	// 8. Start Background Workers
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -73,7 +76,11 @@ func main() {
 		},
 	}
 	
+	// Start Auto-Harvesting
 	go yieldSvc.StartAutoHarvestWorker(ctx, 1*time.Hour, strategies)
+
+	// Listen for new settlements and route 100% to Riquid
+	go yieldSvc.ListenForSettlements(ctx, bus, strategies[0], 100.0)
 
 	log.Println("✅ Settlement daemon is running")
 	
