@@ -13,7 +13,7 @@ This roadmap outlines the integration of the Riquid Self-Driving Yield Engine in
 - [ ] **Contract Bindings:** Generate Go ABIs/bindings for Riquid Vaults and AsterDEX Earn contracts.
 
 ## Phase 3: Riquid Driven Adapter (`pkg/yield`) 💸
-- [x] **`riquid_adapter.go`:** Implementation of the `YieldProvider` interface for Riquid Yield Engine (Skeleton).
+- [/] **`riquid_adapter.go`:** Implementation of the `YieldProvider` interface for Riquid Yield Engine (Manual ABI calls + Metrics).
 - [ ] **State Machine Integration:** Logic to encode/decode calls to Riquid strategy contracts.
 
 ## Phase 4: Self-Driving Yield Automation (`core/domain/service`) 🤖
