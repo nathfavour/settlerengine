@@ -19,12 +19,12 @@ This roadmap outlines the integration of the Riquid Self-Driving Yield Engine in
 ## Phase 4: Self-Driving Yield Automation (`core/domain/service`) 🤖
 - [x] **Auto-Route Service:** Implementation of routing logic upon `SETTLEMENT_CONFIRMED` events.
 - [x] **Threshold Logic:** Implement gas-efficiency triggers to prevent micro-transactions.
-- [ ] **Cron Worker:** Develop a "Self-Driving" background worker for periodic harvesting and reinvestment.
+- [x] **Cron Worker:** Develop a "Self-Driving" background worker for periodic harvesting and reinvestment.
 
 ## Phase 5: Account Abstraction & Session Keys (`pkg/crypto` & `pkg/yield`) 🔐
-- [ ] **ERC-4337 Integration:** Logic to manage funds via non-custodial account abstraction.
+- [/] **ERC-4337 Integration:** Logic to manage funds via non-custodial account abstraction (Skeleton).
 - [x] **Session Key Manager:** Sign "Harvest" and "Reinvest" transactions using restricted-scope keys.
-- [ ] **Paymaster Integration:** Support for gas sponsorship on BSC via `Paymaster` client.
+- [/] **Paymaster Integration:** Support for gas sponsorship on BSC via `Paymaster` client (Port defined).
 
 ## Phase 6: Observability & Validation (`pkg/metrics`) 📊
 - [ ] **Prometheus Metrics:** Track APY performance, total value locked (TVL) in yield, and "Time-to-Settle".
