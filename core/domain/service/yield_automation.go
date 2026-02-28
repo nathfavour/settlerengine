@@ -55,3 +55,27 @@ func (s *YieldService) Rebalance(ctx context.Context, currentStrategy model.Yiel
 	// TODO: Implement cross-vault rebalancing
 	return nil
 }
+
+// StartAutoHarvestWorker runs a background loop to periodically trigger harvesting.
+func (s *YieldService) StartAutoHarvestWorker(ctx context.Context, interval time.Duration, strategies []model.YieldStrategy) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			for _, strategy := range strategies {
+				if !strategy.AutoHarvest {
+					continue
+				}
+				
+				fmt.Printf("🤖 YieldService: Triggering harvest for strategy %s\n", strategy.ID)
+				if err := s.yieldProvider.Harvest(ctx, strategy); err != nil {
+					fmt.Printf("⚠️ YieldService: Failed to harvest %s: %v\n", strategy.ID, err)
+				}
+			}
+		}
+	}
+}

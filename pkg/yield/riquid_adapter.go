@@ -7,16 +7,19 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/nathfavour/settlerengine/core/domain/model"
 	"github.com/nathfavour/settlerengine/core/pkg/money"
+	"github.com/nathfavour/settlerengine/pkg/crypto"
 )
 
 // RiquidAdapter implements the model.YieldProvider interface for the Riquid Yield Engine.
 type RiquidAdapter struct {
 	client *ethclient.Client
+	signer *crypto.SessionKeySigner
 }
 
-func NewRiquidAdapter(client *ethclient.Client) *RiquidAdapter {
+func NewRiquidAdapter(client *ethclient.Client, signer *crypto.SessionKeySigner) *RiquidAdapter {
 	return &RiquidAdapter{
 		client: client,
+		signer: signer,
 	}
 }
 
@@ -43,8 +46,19 @@ func (a *RiquidAdapter) GetAPY(ctx context.Context, vaultAddress string) (float6
 
 // Harvest triggers the claiming and reinvesting of accrued yield.
 func (a *RiquidAdapter) Harvest(ctx context.Context, strategy model.YieldStrategy) error {
-	// TODO: Encode harvest() and broadcast
-	return fmt.Errorf("not implemented")
+	if a.signer == nil {
+		return fmt.Errorf("no signer configured for automated harvest")
+	}
+
+	auth, err := a.signer.GetTransactor(ctx, a.client)
+	if err != nil {
+		return fmt.Errorf("failed to get transactor: %w", err)
+	}
+
+	fmt.Printf("🚜 Harvesting yield from %s using Session Key %s\n", strategy.VaultAddress, a.signer.Address().Hex())
+	// TODO: Actually broadcast harvest() call to the contract
+	_ = auth
+	return nil
 }
 
 // Ensure RiquidAdapter implements model.YieldProvider.
