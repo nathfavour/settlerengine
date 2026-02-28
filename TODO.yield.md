@@ -20,6 +20,7 @@ This roadmap outlines the integration of the Riquid Self-Driving Yield Engine in
 - [x] **Auto-Route Service:** Implementation of routing logic upon `SETTLEMENT_CONFIRMED` events.
 - [x] **Threshold Logic:** Implement gas-efficiency triggers to prevent micro-transactions.
 - [x] **Cron Worker:** Develop a "Self-Driving" background worker for periodic harvesting and reinvestment.
+- [x] **Event Bus Wiring:** Settlement events are now published via `LocalBus` and consumed by `YieldService`.
 
 ## Phase 5: Account Abstraction & Session Keys (`pkg/crypto` & `pkg/yield`) 🔐
 - [/] **ERC-4337 Integration:** Logic to manage funds via non-custodial account abstraction (Skeleton).
