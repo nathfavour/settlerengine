@@ -14,6 +14,8 @@ const (
 	ChainIDPolygon       ChainID = 137
 	ChainIDBaseSepolia   ChainID = 84532
 	ChainIDCronoszkEVM   ChainID = 240
+	ChainIDBSC           ChainID = 56
+	ChainIDBSCTestnet    ChainID = 97
 )
 
 type ChainConfig struct {
@@ -22,6 +24,8 @@ type ChainConfig struct {
 	RPCURL             string
 	FacilitatorAddress string
 	USDCAddress        string
+	USDTAddress        string
+	BUSDAddress        string
 	ExplorerURL        string
 }
 
@@ -32,6 +36,20 @@ func init() {
 		RPCURL:      "https://mainnet.base.org",
 		USDCAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
 		ExplorerURL: "https://basescan.org",
+	})
+	RegisterChain(ChainConfig{
+		Name:        "BSC",
+		ChainID:     ChainIDBSC,
+		RPCURL:      "https://bsc-dataseed.binance.org/",
+		USDTAddress: "0x55d398326f99059fF775485246999027B3197955",
+		BUSDAddress: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+		ExplorerURL: "https://bscscan.com",
+	})
+	RegisterChain(ChainConfig{
+		Name:        "BSC Testnet",
+		ChainID:     ChainIDBSCTestnet,
+		RPCURL:      "https://data-seed-prebsc-1-s1.binance.org:8545/",
+		ExplorerURL: "https://testnet.bscscan.com",
 	})
 	RegisterChain(ChainConfig{
 		Name:        "Base Sepolia",

@@ -26,8 +26,8 @@ This roadmap outlines the integration of the Riquid Self-Driving Yield Engine in
 - [ ] **Update `SettlementEngine` Port:** Add `DepositToYield` and `WithdrawFromYield` methods.
 
 ## Phase 2: BSC Infrastructure & Adapters (`pkg/chains`) ⛓️
-- [ ] **BSC RPC Provider:** Implement a Geth-compatible provider for BNB Smart Chain (BSC).
-- [ ] **Asset Support:** Add configuration and tracking for BNB, USDT (BEP-20), and BUSD.
+- [x] **BSC RPC Provider:** Implement a Geth-compatible provider for BNB Smart Chain (BSC).
+- [/] **Asset Support:** Add configuration and tracking for BNB, USDT (BEP-20), and BUSD.
 - [ ] **Contract Bindings:** Generate Go ABIs/bindings for Riquid Vaults and AsterDEX Earn contracts.
 
 ## Phase 3: Riquid Driven Adapter (`pkg/yield`) 💸
