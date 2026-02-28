@@ -1,13 +1,15 @@
 {
-  "name": "settler",
+  "name": "settlerengine",
   "version": "0.1.0",
   "description": "The Agentic Settlement Gateway for AI Agents and Human Users.",
   "repository": "github.com/nathfavour/settlerengine",
+  "aliases": ["settler"],
   "build": {
+    "toolchain": "go",
     "steps": [
-      "CGO_ENABLED=0 go build -o settler ./cmd/settler"
+      "CGO_ENABLED=0 go build -v -o settlerengine ./cmd/settler"
     ],
-    "bin": "settler"
+    "bin": "settlerengine"
   },
   "runtime": {
     "daemon": true,
