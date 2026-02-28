@@ -1,11 +1,16 @@
 package storage
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/nathfavour/settlerengine/core/domain/model"
+	"github.com/nathfavour/settlerengine/core/pkg/money"
 	_ "modernc.org/sqlite"
 )
 
@@ -53,8 +58,56 @@ func (db *DB) migrate() error {
 		nonce TEXT NOT NULL,
 		verified_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
+
+	CREATE TABLE IF NOT EXISTS invoices (
+		id TEXT PRIMARY KEY,
+		amount TEXT NOT NULL,
+		currency TEXT NOT NULL,
+		status TEXT NOT NULL,
+		created_at DATETIME NOT NULL,
+		expires_at DATETIME NOT NULL
+	);
 	`
 	_, err := db.Exec(query)
+	return err
+}
+
+// Save implements model.InvoiceRepository.
+func (db *DB) Save(ctx context.Context, inv *model.Invoice) error {
+	query := `INSERT INTO invoices (id, amount, currency, status, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)`
+	_, err := db.ExecContext(ctx, query, inv.ID, inv.Amount.Amount().String(), inv.Amount.Currency(), inv.Status, inv.CreatedAt, inv.ExpiresAt)
+	return err
+}
+
+// FindByID implements model.InvoiceRepository.
+func (db *DB) FindByID(ctx context.Context, id string) (*model.Invoice, error) {
+	var amountStr, currency, status string
+	var createdAt, expiresAt time.Time
+	query := `SELECT amount, currency, status, created_at, expires_at FROM invoices WHERE id = ?`
+	err := db.QueryRowContext(ctx, query, id).Scan(&amountStr, &currency, &status, &createdAt, &expiresAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	amount := new(big.Int)
+	amount.SetString(amountStr, 10)
+
+	return &model.Invoice{
+		ID:        id,
+		Amount:    money.New(amount, currency),
+		Status:    model.InvoiceStatus(status),
+		CreatedAt: createdAt,
+		ExpiresAt: expiresAt,
+	}, nil
+}
+
+// UpdateStatus implements model.InvoiceRepository.
+func (db *DB) UpdateStatus(ctx context.Context, id string, status model.InvoiceStatus) error {
+	query := `UPDATE invoices SET status = ? WHERE id = ?`
+	_, err := db.ExecContext(ctx, query, status, id)
 	return err
 }
 
