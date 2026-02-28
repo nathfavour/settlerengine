@@ -15,17 +15,20 @@ type DefaultSettlementEngine struct {
 	repo          model.InvoiceRepository
 	chainClient   model.BlockchainClient
 	yieldProvider model.YieldProvider
+	bus           *LocalBus
 }
 
 func NewDefaultSettlementEngine(
 	repo model.InvoiceRepository,
 	chainClient model.BlockchainClient,
 	yieldProvider model.YieldProvider,
+	bus *LocalBus,
 ) *DefaultSettlementEngine {
 	return &DefaultSettlementEngine{
 		repo:          repo,
 		chainClient:   chainClient,
 		yieldProvider: yieldProvider,
+		bus:           bus,
 	}
 }
 
@@ -69,7 +72,11 @@ func (s *DefaultSettlementEngine) MarkAsSettled(ctx context.Context, id string) 
 		return err
 	}
 
-	// This is where an event would be emitted to the YieldService
+	// Publish event to the bus
+	if s.bus != nil {
+		s.bus.Publish(EventSettlementConfirmed, invoice)
+	}
+
 	return nil
 }
 

@@ -51,6 +51,26 @@ func (s *YieldService) HandleSettlementConfirmed(ctx context.Context, invoice *m
 	return s.yieldProvider.DepositToYield(ctx, routeMoney, strategy)
 }
 
+// ListenForSettlements subscribes to settlement events and routes funds to yield.
+func (s *YieldService) ListenForSettlements(ctx context.Context, bus *LocalBus, strategy model.YieldStrategy, percentage float64) {
+	events := bus.Subscribe(EventSettlementConfirmed)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case event := <-events:
+			invoice, ok := event.Data.(*model.Invoice)
+			if !ok {
+				continue
+			}
+			fmt.Printf("🎯 YieldService: Detected settlement for invoice %s, routing to yield...\n", invoice.ID)
+			if err := s.HandleSettlementConfirmed(ctx, invoice, strategy, percentage); err != nil {
+				fmt.Printf("⚠️ YieldService: Failed to route to yield: %v\n", err)
+			}
+		}
+	}
+}
+
 // Rebalance checks APY and moves funds if a better strategy is available.
 func (s *YieldService) Rebalance(ctx context.Context, currentStrategy model.YieldStrategy, newStrategy model.YieldStrategy) error {
 	// TODO: Implement cross-vault rebalancing
