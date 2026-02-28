@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/nathfavour/settlerengine/pkg/money"
+	"github.com/nathfavour/settlerengine/core/pkg/money"
 )
 
 type InvoiceStatus string

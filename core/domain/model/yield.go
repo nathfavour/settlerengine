@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/nathfavour/settlerengine/pkg/money"
+	"github.com/nathfavour/settlerengine/core/pkg/money"
 )
 
 // YieldStrategy represents the configuration for automated yield generation.

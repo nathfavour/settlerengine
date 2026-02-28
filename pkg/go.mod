@@ -2,7 +2,12 @@ module github.com/nathfavour/settlerengine/pkg
 
 go 1.24.0
 
-require github.com/ethereum/go-ethereum v1.16.8
+require (
+	github.com/ethereum/go-ethereum v1.16.8
+	github.com/nathfavour/settlerengine/core v0.0.0
+)
+
+replace github.com/nathfavour/settlerengine/core => ../core
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect

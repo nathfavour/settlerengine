@@ -3,7 +3,7 @@ package model
 import (
 	"context"
 
-	"github.com/nathfavour/settlerengine/pkg/money"
+	"github.com/nathfavour/settlerengine/core/pkg/money"
 )
 
 // SettlementEngine defines the core driving port for settlement operations.

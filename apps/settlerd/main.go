@@ -6,7 +6,7 @@ import (
 	"math/big"
 
 	"github.com/nathfavour/settlerengine/core/domain/model"
-	"github.com/nathfavour/settlerengine/pkg/money"
+	"github.com/nathfavour/settlerengine/core/pkg/money"
 )
 
 func main() {
