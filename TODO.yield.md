@@ -28,7 +28,7 @@ This roadmap outlines the integration of the Riquid Self-Driving Yield Engine in
 
 ## Phase 6: Observability & Validation (`pkg/metrics`) 📊
 - [x] **Prometheus Metrics:** Track APY performance, total value locked (TVL) in yield, and "Time-to-Settle".
-- [/] **Integration Tests:** End-to-end validation of the BSC -> Riquid flow on Testnet (BSC Sepolia). (Unit tests added).
+- [x] **Integration Tests & Wiring:** End-to-end wiring in `settlerd`, unit tests for yield logic, and mock adapters.
 
 ---
 **Core Requirement:** All implementations must maintain the **Non-Custodial** nature of SettlerEngine. Automation must be achieved through cryptographic delegation (Session Keys), not centralized management.
