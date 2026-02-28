@@ -27,8 +27,8 @@ This roadmap outlines the integration of the Riquid Self-Driving Yield Engine in
 - [/] **Paymaster Integration:** Support for gas sponsorship on BSC via `Paymaster` client (Port defined).
 
 ## Phase 6: Observability & Validation (`pkg/metrics`) 📊
-- [ ] **Prometheus Metrics:** Track APY performance, total value locked (TVL) in yield, and "Time-to-Settle".
-- [ ] **Integration Tests:** End-to-end validation of the BSC -> Riquid flow on Testnet (BSC Sepolia).
+- [x] **Prometheus Metrics:** Track APY performance, total value locked (TVL) in yield, and "Time-to-Settle".
+- [/] **Integration Tests:** End-to-end validation of the BSC -> Riquid flow on Testnet (BSC Sepolia). (Unit tests added).
 
 ---
 **Core Requirement:** All implementations must maintain the **Non-Custodial** nature of SettlerEngine. Automation must be achieved through cryptographic delegation (Session Keys), not centralized management.
