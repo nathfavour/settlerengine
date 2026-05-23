@@ -72,3 +72,12 @@ type PricingPolicy struct {
 	BasePrice       Money
 	SurgeMultiplier float64
 }
+
+type Escrow struct {
+	ID           string
+	InvoiceID    string
+	Amount       Money
+	Status       string
+	DeliveryHash string
+	CreatedAt    time.Time
+}

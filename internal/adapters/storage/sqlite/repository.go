@@ -303,4 +303,45 @@ func (r *SqliteRepository) GetPolicy(ctx context.Context, resourcePath string) (
 	}, nil
 }
 
+func (r *SqliteRepository) SaveEscrow(ctx context.Context, escrow *domain.Escrow) error {
+	return r.queries.SaveEscrow(ctx, db.SaveEscrowParams{
+		ID:           escrow.ID,
+		InvoiceID:    escrow.InvoiceID,
+		Amount:       escrow.Amount.Amount().String(),
+		Currency:     escrow.Amount.Currency(),
+		Status:       escrow.Status,
+		DeliveryHash: escrow.DeliveryHash,
+		CreatedAt:    escrow.CreatedAt.Unix(),
+	})
+}
+
+func (r *SqliteRepository) GetEscrow(ctx context.Context, id string) (*domain.Escrow, error) {
+	row, err := r.queries.GetEscrow(ctx, id)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	amountBig := new(big.Int)
+	amountBig.SetString(row.Amount, 10)
+
+	return &domain.Escrow{
+		ID:           row.ID,
+		InvoiceID:    row.InvoiceID,
+		Amount:       domain.NewMoney(amountBig, row.Currency),
+		Status:       row.Status,
+		DeliveryHash: row.DeliveryHash,
+		CreatedAt:    time.Unix(row.CreatedAt, 0),
+	}, nil
+}
+
+func (r *SqliteRepository) UpdateEscrow(ctx context.Context, id string, status string) error {
+	return r.queries.UpdateEscrowStatus(ctx, db.UpdateEscrowStatusParams{
+		Status: status,
+		ID:     id,
+	})
+}
+
 var _ ports.DBStore = (*SqliteRepository)(nil)

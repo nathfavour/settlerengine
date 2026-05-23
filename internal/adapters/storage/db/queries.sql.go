@@ -387,3 +387,68 @@ func (q *Queries) GetPricingPolicy(ctx context.Context, resourcePath string) (Pr
 	)
 	return i, err
 }
+
+const saveEscrow = `
+INSERT INTO escrows (id, invoice_id, amount, currency, status, delivery_hash, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+`
+
+type SaveEscrowParams struct {
+	ID           string
+	InvoiceID    string
+	Amount       string
+	Currency     string
+	Status       string
+	DeliveryHash string
+	CreatedAt    int64
+}
+
+func (q *Queries) SaveEscrow(ctx context.Context, arg SaveEscrowParams) error {
+	_, err := q.db.ExecContext(ctx, saveEscrow,
+		arg.ID,
+		arg.InvoiceID,
+		arg.Amount,
+		arg.Currency,
+		arg.Status,
+		arg.DeliveryHash,
+		arg.CreatedAt,
+	)
+	return err
+}
+
+const getEscrow = `
+SELECT id, invoice_id, amount, currency, status, delivery_hash, created_at
+FROM escrows
+WHERE id = ?;
+`
+
+func (q *Queries) GetEscrow(ctx context.Context, id string) (Escrow, error) {
+	row := q.db.QueryRowContext(ctx, getEscrow, id)
+	var i Escrow
+	err := row.Scan(
+		&i.ID,
+		&i.InvoiceID,
+		&i.Amount,
+		&i.Currency,
+		&i.Status,
+		&i.DeliveryHash,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateEscrowStatus = `
+UPDATE escrows
+SET status = ?
+WHERE id = ?;
+`
+
+type UpdateEscrowStatusParams struct {
+	Status string
+	ID     string
+}
+
+func (q *Queries) UpdateEscrowStatus(ctx context.Context, arg UpdateEscrowStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateEscrowStatus, arg.Status, arg.ID)
+	return err
+}

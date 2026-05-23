@@ -36,11 +36,18 @@ type PricingStore interface {
 	GetPolicy(ctx context.Context, resourcePath string) (*domain.PricingPolicy, error)
 }
 
+type EscrowStore interface {
+	SaveEscrow(ctx context.Context, escrow *domain.Escrow) error
+	GetEscrow(ctx context.Context, id string) (*domain.Escrow, error)
+	UpdateEscrow(ctx context.Context, id string, status string) error
+}
+
 type DBStore interface {
 	InvoiceStore
 	VerifiedPaymentStore
 	WebhookStore
 	PricingStore
+	EscrowStore
 	Close() error
 	Vacuum(ctx context.Context) error
 }
