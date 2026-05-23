@@ -73,3 +73,17 @@ VALUES (?, ?, ?, ?);
 SELECT resource_path, base_price, currency, surge_multiplier
 FROM pricing_policies
 WHERE resource_path = ?;
+
+-- name: SaveEscrow :exec
+INSERT INTO escrows (id, invoice_id, amount, currency, status, delivery_hash, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetEscrow :one
+SELECT id, invoice_id, amount, currency, status, delivery_hash, created_at
+FROM escrows
+WHERE id = ?;
+
+-- name: UpdateEscrowStatus :exec
+UPDATE escrows
+SET status = ?
+WHERE id = ?;

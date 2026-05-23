@@ -48,3 +48,13 @@ CREATE TABLE pricing_policies (
     currency VARCHAR(50) NOT NULL,
     surge_multiplier DOUBLE PRECISION NOT NULL
 );
+
+CREATE TABLE escrows (
+    id VARCHAR(255) PRIMARY KEY,
+    invoice_id VARCHAR(255) NOT NULL,
+    amount VARCHAR(255) NOT NULL,
+    currency VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    delivery_hash VARCHAR(255) NOT NULL,
+    created_at BIGINT NOT NULL
+);

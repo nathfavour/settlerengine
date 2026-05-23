@@ -50,3 +50,13 @@ type PricingPolicy struct {
 	Currency        string
 	SurgeMultiplier float64
 }
+
+type Escrow struct {
+	ID           string
+	InvoiceID    string
+	Amount       string
+	Currency     string
+	Status       string
+	DeliveryHash string
+	CreatedAt    int64
+}
