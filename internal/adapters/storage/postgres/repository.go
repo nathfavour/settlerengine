@@ -330,4 +330,41 @@ func (r *PostgresRepository) UpdateEscrow(ctx context.Context, id string, status
 	})
 }
 
+func (r *PostgresRepository) SaveLsatChallenge(ctx context.Context, challenge *domain.LsatChallenge) error {
+	return r.queries.SaveLsatChallenge(ctx, db.SaveLsatChallengeParams{
+		MacaroonID:   challenge.MacaroonID,
+		PreimageHash: challenge.PreimageHash,
+		Preimage:     challenge.Preimage,
+		ResourcePath: challenge.ResourcePath,
+		Amount:       challenge.Amount,
+		CreatedAt:    challenge.CreatedAt.Unix(),
+	})
+}
+
+func (r *PostgresRepository) GetLsatChallenge(ctx context.Context, macaroonID string) (*domain.LsatChallenge, error) {
+	row, err := r.queries.GetLsatChallenge(ctx, macaroonID)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.LsatChallenge{
+		MacaroonID:   row.MacaroonID,
+		PreimageHash: row.PreimageHash,
+		Preimage:     row.Preimage,
+		ResourcePath: row.ResourcePath,
+		Amount:       row.Amount,
+		CreatedAt:    time.Unix(row.CreatedAt, 0),
+	}, nil
+}
+
+func (r *PostgresRepository) UpdateLsatChallengePreimage(ctx context.Context, macaroonID string, preimage string) error {
+	return r.queries.UpdateLsatPreimage(ctx, db.UpdateLsatPreimageParams{
+		Preimage:   preimage,
+		MacaroonID: macaroonID,
+	})
+}
+
 var _ ports.DBStore = (*PostgresRepository)(nil)

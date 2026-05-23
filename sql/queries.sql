@@ -87,3 +87,17 @@ WHERE id = ?;
 UPDATE escrows
 SET status = ?
 WHERE id = ?;
+
+-- name: SaveLsatChallenge :exec
+INSERT INTO lsat_challenges (macaroon_id, preimage_hash, preimage, resource_path, amount, created_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- name: GetLsatChallenge :one
+SELECT macaroon_id, preimage_hash, preimage, resource_path, amount, created_at
+FROM lsat_challenges
+WHERE macaroon_id = ?;
+
+-- name: UpdateLsatPreimage :exec
+UPDATE lsat_challenges
+SET preimage = ?
+WHERE macaroon_id = ?;

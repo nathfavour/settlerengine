@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SettlerEngine — Merchant Sovereign Terminal</title>
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #07090e;
+            --bg-surface: rgba(13, 17, 28, 0.7);
+            --border-glow: rgba(99, 102, 241, 0.15);
+            --border-active: rgba(99, 102, 241, 0.4);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            
+            /* Curated Neon Colors */
+            --color-usdc: #2775ca;
+            --color-usdt: #26a17b;
+            --color-btc: #f7931a;
+            --color-xmr: #ff6600;
+            
+            /* Primary Accent Gradients */
+            --gradient-accent: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --glow-accent: 0 0 20px rgba(168, 85, 247, 0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+        }
+
+        /* Sovereign Glass Container */
+        .glass-panel {
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-panel:hover {
+            border-color: var(--border-active);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Layout Grid */
+        .app-wrapper {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            border-right: 1px solid var(--border-glow);
+            background: rgba(8, 10, 18, 0.85);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 3rem;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--glow-accent);
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -1px;
+            color: #fff;
+        }
+
+        .brand-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active a, .nav-item a:hover {
+            color: #fff;
+            background: rgba(99, 102, 241, 0.12);
+            border-left: 3px solid #6366f1;
+        }
+
+        /* Main Workspace Content */
+        main {
+            padding: 2.5rem;
+            overflow-y: auto;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header-title h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Network Badges */
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-pulse {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+        }
+
+        /* Metric Dashboard Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .metric-card {
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-accent);
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-subtext {
+            font-size: 0.8rem;
+            color: #10b981;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .metric-subtext.down {
+            color: #ef4444;
+        }
+
+        /* Dynamic Split Panels */
+        .workspace-split {
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        /* Invoice Tracking Panel */
+        .panel-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-glow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .panel-body {
+            padding: 1.5rem;
+        }
+
+        /* Invoices Table styling */
+        .invoice-table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 1rem 0.75rem;
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        td {
+            padding: 1.1rem 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.paid {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+        }
+
+        .badge.pending {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+        }
+
+        .badge.expired {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+        }
+
+        /* Invoice Creator Form */
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-glow);
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: #6366f1;
+        }
+
+        select.input-field option {
+            background: var(--bg-base);
+            color: #fff;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.5rem;
+            background: var(--gradient-accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: var(--glow-accent);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Pricing & APY Controls panel */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+
+        .slider-control {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-title {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .slider-val {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            color: #6366f1;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: #6366f1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        /* Live Activity Terminal */
+        .terminal {
+            background: rgba(5, 5, 8, 0.95);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-family: 'Space Grotesk', monospace;
+            height: 250px;
+            overflow-y: auto;
+            color: #34d399;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .terminal::-webkit-scrollbar {
+            width: 6px;
+        }
+        .terminal::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .terminal-line {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .terminal-time {
+            color: var(--text-secondary);
+        }
+
+        .terminal-tag {
+            font-weight: 700;
+            color: #6366f1;
+        }
+
+        /* Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside>
+            <div>
+                <div class="brand">
+                    <div class="brand-logo">S</div>
+                    <span class="brand-title">SettlerEngine</span>
+                </div>
+                
+                <ul class="nav-list">
+                    <li class="nav-item active">
+                        <a href="#dashboard">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#invoices">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            Invoices
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#yield">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Yield Autopilot
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#webhooks">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                            Webhooks Config
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                Sovereign Node v1.2.0<br>
+                CGO-Free Native SQLite
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main>
+            <!-- Header -->
+            <header>
+                <div class="header-title">
+                    <h1>Sovereign Merchant Terminal</h1>
+                    <p>Programmatic machine payments gateway and multi-vault yield engine</p>
+                </div>
+                
+                <div class="system-status">
+                    <div class="status-badge">
+                        <span class="status-pulse"></span>
+                        LiteFS Active Replica (Node-2)
+                    </div>
+                </div>
+            </header>
+
+            <!-- Metrics Cards Grid -->
+            <section class="metrics-grid">
+                <div class="glass-panel metric-card">
+                    <div class="metric-label">Settled Revenue</div>
+                    <div class="metric-value" id="val-rev">$45,190.20</div>
+                    <div class="metric-subtext">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                        +18.4% this week
+                    </div>
+                </div>
+                <div class="glass-panel metric-card">
+                    <div class="metric-label">Active Invoices</div>
+                    <div class="metric-value" id="val-active">8</div>
+                    <div class="metric-subtext">Processing 4 chains</div>
+                </div>
+                <div class="glass-panel metric-card">
+                    <div class="metric-label">Autopilot APY</div>
+                    <div class="metric-value">12.85%</div>
+                    <div class="metric-subtext">Harvesting BSC vaults</div>
+                </div>
+                <div class="glass-panel metric-card">
+                    <div class="metric-label">Operational Memory</div>
+                    <div class="metric-value">4.8 MB</div>
+                    <div class="metric-subtext">CGO-Free static binary</div>
+                </div>
+            </section>
+
+            <!-- Workspace Split Panels -->
+            <section class="workspace-split">
+                <!-- Left Panel: Invoices Table -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Sovereign Invoices Ledger</span>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">Real-Time Watcher Node Active</div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="invoice-table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Network/Token</th>
+                                        <th>Amount</th>
+                                        <th>Target Address</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoice-rows">
+                                    <tr>
+                                        <td>inv_9a48f2</td>
+                                        <td><span style="color: var(--color-usdc);">USDC (Solana)</span></td>
+                                        <td>2,500.00 USDC</td>
+                                        <td>SolMockAddress7f230...</td>
+                                        <td><span class="badge paid">Paid</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>inv_0c8f1e</td>
+                                        <td><span style="color: var(--color-usdt);">USDT (Tron)</span></td>
+                                        <td>1,200.00 USDT</td>
+                                        <td>TNNsTzF68nCipQyS4hT3...</td>
+                                        <td><span class="badge paid">Paid</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>inv_b52f6c</td>
+                                        <td><span style="color: var(--color-xmr);">XMR (Monero)</span></td>
+                                        <td>4.50 XMR</td>
+                                        <td>84WJg4Xm5k1J3sC8p3X...</td>
+                                        <td><span class="badge pending">Pending</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>inv_8e4f1a</td>
+                                        <td><span style="color: var(--color-btc);">BTC (Bitcoin)</span></td>
+                                        <td>0.082 BTC</td>
+                                        <td>bc1q7yfg83kd91ns83d...</td>
+                                        <td><span class="badge expired">Expired</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Controls & Quick Invoice -->
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <!-- Invoice Creator -->
+                    <div class="glass-panel" style="padding: 1.5rem;">
+                        <h3 class="panel-title" style="margin-bottom: 1.25rem;">Generate Payment Invoice</h3>
+                        
+                        <div class="input-group">
+                            <label>Amount</label>
+                            <input type="number" id="form-amount" class="input-field" placeholder="100.00" value="100">
+                        </div>
+                        <div class="input-group">
+                            <label>Settlement Asset</label>
+                            <select id="form-asset" class="input-field">
+                                <option value="USDC">USDC (Solana SPL)</option>
+                                <option value="USDT">USDT (Tron TRC-20)</option>
+                                <option value="XMR">XMR (Monero View-Key Scan)</option>
+                                <option value="BTC">BTC (BIP-84 XPUB)</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="createNewInvoice()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Generate Sovereign Invoice
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Pricing Policy -->
+                    <div class="glass-panel" style="padding: 1.5rem;">
+                        <h3 class="panel-title" style="margin-bottom: 1.25rem;">Dynamic Pricing & SLA Policies</h3>
+                        
+                        <div class="slider-control">
+                            <div class="slider-header">
+                                <span class="slider-title">Surge Multiplier</span>
+                                <span class="slider-val" id="surge-val">1.25x</span>
+                            </div>
+                            <input type="range" min="1.0" max="3.0" step="0.05" value="1.25" id="slider-surge" oninput="updateSurgeVal()">
+                        </div>
+
+                        <div class="slider-control">
+                            <div class="slider-header">
+                                <span class="slider-title">Reputation BPS Offset</span>
+                                <span class="slider-val" id="reputation-val">-50 bps</span>
+                            </div>
+                            <input type="range" min="0" max="200" step="10" value="50" id="slider-reputation" oninput="updateRepVal()">
+                        </div>
+
+                        <div class="slider-control">
+                            <div class="slider-header">
+                                <span class="slider-title">Sweep Trigger Threshold</span>
+                                <span class="slider-val" id="sweep-val">$250</span>
+                            </div>
+                            <input type="range" min="50" max="1000" step="50" value="250" id="slider-sweep" oninput="updateSweepVal()">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Console Log Window -->
+            <h3 class="panel-title" style="margin-bottom: 0.75rem;">Companion Daemon Core Event Log</h3>
+            <div class="terminal" id="terminal-win">
+                <div class="terminal-line">
+                    <span class="terminal-time">[16:18:10]</span>
+                    <span class="terminal-tag">DAEMON</span>
+                    <span>📂 Storage Adapters bound successfully to local FUSE mount /litefs</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-time">[16:18:12]</span>
+                    <span class="terminal-tag">DAEMON</span>
+                    <span>🔒 Session keystore loaded with AES-256-GCM secure credentials</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-time">[16:18:15]</span>
+                    <span class="terminal-tag">WATCHER</span>
+                    <span>🔗 Multi-chain listeners active on Bitcoin mainnet, Monero RPC, Solana WS</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-time">[16:18:20]</span>
+                    <span class="terminal-tag">PRUNER</span>
+                    <span>🧹 Expired invoices pruner daemon scheduled for 24h cron execution</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Interactive Simulation -->
+    <script>
+        const terminal = document.getElementById("terminal-win");
+        
+        function logToTerminal(tag, message) {
+            const now = new Date();
+            const timeStr = `[${now.toTimeString().split(' ')[0]}]`;
+            
+            const line = document.createElement("div");
+            line.className = "terminal-line";
+            line.innerHTML = `
+                <span class="terminal-time">${timeStr}</span>
+                <span class="terminal-tag">${tag}</span>
+                <span>${message}</span>
+            `;
+            
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function updateSurgeVal() {
+            const v = document.getElementById("slider-surge").value;
+            document.getElementById("surge-val").innerText = v + "x";
+            logToTerminal("PRICING", `Updated dynamic surge multiplier policy to ${v}x`);
+        }
+
+        function updateRepVal() {
+            const v = document.getElementById("slider-reputation").value;
+            document.getElementById("reputation-val").innerText = "-" + v + " bps";
+            logToTerminal("PRICING", `Updated maximum client reputation discount to -${v} BPS`);
+        }
+
+        function updateSweepVal() {
+            const v = document.getElementById("slider-sweep").value;
+            document.getElementById("sweep-val").innerText = "$" + v;
+            logToTerminal("YIELD", `Updated automated BNB Chain deposit threshold sweep to $${v}`);
+        }
+
+        function createNewInvoice() {
+            const amount = document.getElementById("form-amount").value;
+            const asset = document.getElementById("form-asset").value;
+            
+            if(!amount || amount <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+
+            const id = "inv_" + Math.random().toString(36).substring(2, 8);
+            
+            let networkStr = "";
+            let targetAddr = "";
+            
+            if(asset === "USDC") {
+                networkStr = `<span style="color: var(--color-usdc);">USDC (Solana)</span>`;
+                targetAddr = "SolMockAddress" + Math.random().toString(16).substring(2, 10);
+            } else if(asset === "USDT") {
+                networkStr = `<span style="color: var(--color-usdt);">USDT (Tron)</span>`;
+                targetAddr = "TNNsTzF68nCipQyS4hT" + Math.random().toString(36).substring(2, 6);
+            } else if(asset === "XMR") {
+                networkStr = `<span style="color: var(--color-xmr);">XMR (Monero)</span>`;
+                targetAddr = "84WJg4Xm5k1J3sC8p3X" + Math.random().toString(36).substring(2, 6);
+            } else {
+                networkStr = `<span style="color: var(--color-btc);">BTC (Bitcoin)</span>`;
+                targetAddr = "bc1q" + Math.random().toString(16).substring(2, 12);
+            }
+
+            const newRow = document.createElement("tr");
+            newRow.id = id;
+            newRow.innerHTML = `
+                <td>${id}</td>
+                <td>${networkStr}</td>
+                <td>${Number(amount).toLocaleString()} ${asset}</td>
+                <td>${targetAddr.substring(0, 20)}...</td>
+                <td><span class="badge pending">Pending</span></td>
+            `;
+
+            const tbody = document.getElementById("invoice-rows");
+            tbody.insertBefore(newRow, tbody.firstChild);
+
+            logToTerminal("API", `Created new invoice ${id} for ${amount} ${asset}`);
+            logToTerminal("WATCHER", `Registered payment listener on address ${targetAddr}`);
+
+            // Simulate incoming automatic payment for UX wow-factor!
+            setTimeout(() => {
+                const row = document.getElementById(id);
+                if(row) {
+                    row.querySelector(".badge").className = "badge paid";
+                    row.querySelector(".badge").innerText = "Paid";
+                    
+                    const revEl = document.getElementById("val-rev");
+                    const oldRev = parseFloat(revEl.innerText.replace('$', '').replace(',', ''));
+                    const addedVal = asset === "BTC" ? amount * 60000 : (asset === "XMR" ? amount * 150 : amount * 1);
+                    const newRev = oldRev + addedVal;
+                    revEl.innerText = "$" + newRev.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    
+                    logToTerminal("WATCHER", `🔔 Payment detected: Verified incoming txn signature for invoice ${id}`);
+                    logToTerminal("WEBHOOK", `⚡ Webhook outbox dispatched successfully for ${id} (HMAC-SHA256 verified)`);
+                }
+            }, 6000);
+        }
+
+        // Live Simulated Event Feeder
+        setInterval(() => {
+            const events = [
+                () => logToTerminal("LITEFS", "🔄 Replicating transactional state page with Node-1 primary"),
+                () => logToTerminal("PRUNER", "💾 Executing incremental vacuum: 40 pages released back to host OS"),
+                () => logToTerminal("DAEMON", "📈 CPU operational utilization at 0.05%, RAM remains rock steady at 4.8MB"),
+                () => logToTerminal("YIELD", "🌾 Vault Autopilot queried APY rates on Base & BSC: 12.85% stablecoin average")
+            ];
+            const randIdx = Math.floor(Math.random() * events.length);
+            events[randIdx]();
+        }, 15000);
+    </script>
+</body>
+</html>

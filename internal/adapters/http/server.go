@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/nathfavour/settlerengine/internal/domain"
@@ -98,9 +99,12 @@ func (s *Server) Start(ctx context.Context) error {
 		})
 	})
 
+	litefsPath := os.Getenv("LITEFS_PRIMARY_FILE_PATH")
+	handler := LiteFSWriteRouting(litefsPath, mux)
+
 	server := &http.Server{
 		Addr:    s.listenAddr,
-		Handler: mux,
+		Handler: handler,
 	}
 
 	go func() {

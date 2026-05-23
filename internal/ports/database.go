@@ -42,12 +42,19 @@ type EscrowStore interface {
 	UpdateEscrow(ctx context.Context, id string, status string) error
 }
 
+type LsatStore interface {
+	SaveLsatChallenge(ctx context.Context, challenge *domain.LsatChallenge) error
+	GetLsatChallenge(ctx context.Context, macaroonID string) (*domain.LsatChallenge, error)
+	UpdateLsatChallengePreimage(ctx context.Context, macaroonID string, preimage string) error
+}
+
 type DBStore interface {
 	InvoiceStore
 	VerifiedPaymentStore
 	WebhookStore
 	PricingStore
 	EscrowStore
+	LsatStore
 	Close() error
 	Vacuum(ctx context.Context) error
 }

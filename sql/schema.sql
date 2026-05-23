@@ -58,3 +58,12 @@ CREATE TABLE escrows (
     delivery_hash VARCHAR(255) NOT NULL,
     created_at BIGINT NOT NULL
 );
+
+CREATE TABLE lsat_challenges (
+    macaroon_id VARCHAR(255) PRIMARY KEY,
+    preimage_hash VARCHAR(255) NOT NULL,
+    preimage VARCHAR(255) NOT NULL,
+    resource_path VARCHAR(255) NOT NULL,
+    amount BIGINT NOT NULL,
+    created_at BIGINT NOT NULL
+);

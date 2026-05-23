@@ -452,3 +452,65 @@ func (q *Queries) UpdateEscrowStatus(ctx context.Context, arg UpdateEscrowStatus
 	_, err := q.db.ExecContext(ctx, updateEscrowStatus, arg.Status, arg.ID)
 	return err
 }
+
+const saveLsatChallenge = `
+INSERT INTO lsat_challenges (macaroon_id, preimage_hash, preimage, resource_path, amount, created_at)
+VALUES (?, ?, ?, ?, ?, ?);
+`
+
+type SaveLsatChallengeParams struct {
+	MacaroonID   string
+	PreimageHash string
+	Preimage     string
+	ResourcePath string
+	Amount       int64
+	CreatedAt    int64
+}
+
+func (q *Queries) SaveLsatChallenge(ctx context.Context, arg SaveLsatChallengeParams) error {
+	_, err := q.db.ExecContext(ctx, saveLsatChallenge,
+		arg.MacaroonID,
+		arg.PreimageHash,
+		arg.Preimage,
+		arg.ResourcePath,
+		arg.Amount,
+		arg.CreatedAt,
+	)
+	return err
+}
+
+const getLsatChallenge = `
+SELECT macaroon_id, preimage_hash, preimage, resource_path, amount, created_at
+FROM lsat_challenges
+WHERE macaroon_id = ?;
+`
+
+func (q *Queries) GetLsatChallenge(ctx context.Context, macaroonID string) (LsatChallenge, error) {
+	row := q.db.QueryRowContext(ctx, getLsatChallenge, macaroonID)
+	var i LsatChallenge
+	err := row.Scan(
+		&i.MacaroonID,
+		&i.PreimageHash,
+		&i.Preimage,
+		&i.ResourcePath,
+		&i.Amount,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateLsatPreimage = `
+UPDATE lsat_challenges
+SET preimage = ?
+WHERE macaroon_id = ?;
+`
+
+type UpdateLsatPreimageParams struct {
+	Preimage   string
+	MacaroonID string
+}
+
+func (q *Queries) UpdateLsatPreimage(ctx context.Context, arg UpdateLsatPreimageParams) error {
+	_, err := q.db.ExecContext(ctx, updateLsatPreimage, arg.Preimage, arg.MacaroonID)
+	return err
+}

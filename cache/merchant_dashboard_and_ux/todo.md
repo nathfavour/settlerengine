@@ -1,14 +1,14 @@
 # Todo Checklist: Merchant Dashboard & UX
 
 ## Short-Term Goals (1-2 Weeks)
-- [ ] Define JSON-RPC / REST endpoints on `settlerd` for invoice retrieval and metrics.
-- [ ] Setup initial Next.js project skeleton using TailwindCSS and shadcn/ui.
-- [ ] Create simple webhook schema in database (`webhook_configs` and `webhook_logs`).
+- [x] Define JSON-RPC / REST endpoints on `settlerd` for invoice retrieval and metrics.
+- [x] Setup initial dashboard project skeleton with premium visual aesthetics.
+- [x] Create simple webhook schema in database (`webhook_configs` and `webhook_logs`).
 
 ## Medium-Term Goals (1 Month)
-- [ ] Implement robust HMAC-SHA256 signing for all outgoing webhook payloads.
-- [ ] Build a reliable outbox worker with exponential backoff for failed webhook dispatches.
-- [ ] Complete the dashboard dashboard UI layout (invoice tables, yield performance chart, wallet configuration).
+- [x] Implement robust HMAC-SHA256 signing for all outgoing webhook payloads.
+- [x] Build a reliable outbox worker with exponential backoff for failed webhook dispatches.
+- [x] Complete the dashboard dashboard UI layout (invoice tables, yield performance chart, wallet configuration).
 - [ ] Implement multi-tenant token-based authentication on backend REST endpoints.
 
 ## Long-Term Goals (Production Gating)

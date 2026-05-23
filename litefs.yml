@@ -1,0 +1,43 @@
+# LiteFS production configuration for SettlerEngine
+# This file manages SQLite database replication across multiple nodes.
+
+# The directory where LiteFS mounts the FUSE file system.
+# The SQLite database should reside within this directory to be replicated.
+fuse:
+  dir: "/litefs"
+
+# The directory where LiteFS stores its internal state, transactional logs, and local databases.
+# This directory should be backed by a persistent volume to preserve state across restarts.
+data:
+  dir: "/var/lib/litefs"
+
+# The lease management configuration. This governs leader election for database writes.
+# Only the leader (primary node) can write to the database; others are read-only replicas.
+lease:
+  type: "consul"
+  
+  # How other nodes can reach this node's internal API over private networking.
+  advertise-url: "http://${HOSTNAME}.vm.${FLY_APP_NAME}.internal:20202"
+  
+  # If true, this node participates in leader elections.
+  # Typically set dynamically so only nodes in the primary region can become candidates.
+  candidate: ${FLY_REGION == PRIMARY_REGION}
+  
+  # Automatically promote this node to primary if no other primary is available.
+  promote: true
+  
+  # Consul backend connection details (e.g., provided on Fly.io)
+  consul:
+    url: "${FLY_CONSUL_URL}"
+    key: "litefs/${FLY_APP_NAME}"
+
+# Intercept database HTTP traffic to auto-forward or handle write-routing in LiteFS proxy
+proxy:
+  addr: ":8080"
+  target: "localhost:8081"
+  db: "settler.db"
+
+# Optional: Commands to run after LiteFS mounts the file system.
+# This ensures that settlerd only starts after FUSE mount is active.
+exec:
+  - cmd: "bin/settlerd"

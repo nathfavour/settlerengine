@@ -81,3 +81,12 @@ type Escrow struct {
 	DeliveryHash string
 	CreatedAt    time.Time
 }
+
+type LsatChallenge struct {
+	MacaroonID   string
+	PreimageHash string
+	Preimage     string
+	ResourcePath string
+	Amount       int64
+	CreatedAt    time.Time
+}
