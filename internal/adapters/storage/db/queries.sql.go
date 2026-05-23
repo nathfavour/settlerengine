@@ -514,3 +514,158 @@ func (q *Queries) UpdateLsatPreimage(ctx context.Context, arg UpdateLsatPreimage
 	_, err := q.db.ExecContext(ctx, updateLsatPreimage, arg.Preimage, arg.MacaroonID)
 	return err
 }
+
+const saveYieldStrategy = `
+INSERT OR REPLACE INTO yield_strategies (id, provider, vault_address, asset, tvl, apy, last_harvest_at, status)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+`
+
+type SaveYieldStrategyParams struct {
+	ID            string
+	Provider      string
+	VaultAddress  string
+	Asset         string
+	Tvl           string
+	Apy           float64
+	LastHarvestAt int64
+	Status        string
+}
+
+func (q *Queries) SaveYieldStrategy(ctx context.Context, arg SaveYieldStrategyParams) error {
+	_, err := q.db.ExecContext(ctx, saveYieldStrategy,
+		arg.ID,
+		arg.Provider,
+		arg.VaultAddress,
+		arg.Asset,
+		arg.Tvl,
+		arg.Apy,
+		arg.LastHarvestAt,
+		arg.Status,
+	)
+	return err
+}
+
+const getYieldStrategy = `
+SELECT id, provider, vault_address, asset, tvl, apy, last_harvest_at, status
+FROM yield_strategies
+WHERE id = ?;
+`
+
+func (q *Queries) GetYieldStrategy(ctx context.Context, id string) (YieldStrategy, error) {
+	row := q.db.QueryRowContext(ctx, getYieldStrategy, id)
+	var i YieldStrategy
+	err := row.Scan(
+		&i.ID,
+		&i.Provider,
+		&i.VaultAddress,
+		&i.Asset,
+		&i.Tvl,
+		&i.Apy,
+		&i.LastHarvestAt,
+		&i.Status,
+	)
+	return i, err
+}
+
+const getYieldStrategies = `
+SELECT id, provider, vault_address, asset, tvl, apy, last_harvest_at, status
+FROM yield_strategies;
+`
+
+func (q *Queries) GetYieldStrategies(ctx context.Context) ([]YieldStrategy, error) {
+	rows, err := q.db.QueryContext(ctx, getYieldStrategies)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []YieldStrategy
+	for rows.Next() {
+		var i YieldStrategy
+		if err := rows.Scan(
+			&i.ID,
+			&i.Provider,
+			&i.VaultAddress,
+			&i.Asset,
+			&i.Tvl,
+			&i.Apy,
+			&i.LastHarvestAt,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const recordYieldHarvest = `
+INSERT INTO yield_harvests (id, strategy_id, amount, asset, tx_hash, status, harvested_at)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+`
+
+type RecordYieldHarvestParams struct {
+	ID          string
+	StrategyID  string
+	Amount      string
+	Asset       string
+	TxHash      string
+	Status      string
+	HarvestedAt int64
+}
+
+func (q *Queries) RecordYieldHarvest(ctx context.Context, arg RecordYieldHarvestParams) error {
+	_, err := q.db.ExecContext(ctx, recordYieldHarvest,
+		arg.ID,
+		arg.StrategyID,
+		arg.Amount,
+		arg.Asset,
+		arg.TxHash,
+		arg.Status,
+		arg.HarvestedAt,
+	)
+	return err
+}
+
+const getYieldHarvests = `
+SELECT id, strategy_id, amount, asset, tx_hash, status, harvested_at
+FROM yield_harvests
+WHERE strategy_id = ?;
+`
+
+func (q *Queries) GetYieldHarvests(ctx context.Context, strategyID string) ([]YieldHarvest, error) {
+	rows, err := q.db.QueryContext(ctx, getYieldHarvests, strategyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []YieldHarvest
+	for rows.Next() {
+		var i YieldHarvest
+		if err := rows.Scan(
+			&i.ID,
+			&i.StrategyID,
+			&i.Amount,
+			&i.Asset,
+			&i.TxHash,
+			&i.Status,
+			&i.HarvestedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+

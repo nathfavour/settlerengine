@@ -65,5 +65,26 @@ CREATE TABLE lsat_challenges (
     preimage VARCHAR(255) NOT NULL,
     resource_path VARCHAR(255) NOT NULL,
     amount BIGINT NOT NULL,
-    created_at BIGINT NOT NULL
 );
+
+CREATE TABLE yield_strategies (
+    id VARCHAR(255) PRIMARY KEY,
+    provider VARCHAR(255) NOT NULL,
+    vault_address VARCHAR(255) NOT NULL,
+    asset VARCHAR(50) NOT NULL,
+    tvl VARCHAR(255) NOT NULL,
+    apy DOUBLE PRECISION NOT NULL,
+    last_harvest_at BIGINT NOT NULL,
+    status VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE yield_harvests (
+    id VARCHAR(255) PRIMARY KEY,
+    strategy_id VARCHAR(255) NOT NULL,
+    amount VARCHAR(255) NOT NULL,
+    asset VARCHAR(50) NOT NULL,
+    tx_hash VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    harvested_at BIGINT NOT NULL
+);
+

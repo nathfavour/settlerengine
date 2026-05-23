@@ -48,6 +48,14 @@ type LsatStore interface {
 	UpdateLsatChallengePreimage(ctx context.Context, macaroonID string, preimage string) error
 }
 
+type YieldStore interface {
+	SaveYieldStrategy(ctx context.Context, strategy *domain.YieldStrategy) error
+	GetYieldStrategy(ctx context.Context, id string) (*domain.YieldStrategy, error)
+	GetYieldStrategies(ctx context.Context) ([]*domain.YieldStrategy, error)
+	RecordYieldHarvest(ctx context.Context, harvest *domain.YieldHarvest) error
+	GetYieldHarvests(ctx context.Context, strategyID string) ([]*domain.YieldHarvest, error)
+}
+
 type DBStore interface {
 	InvoiceStore
 	VerifiedPaymentStore
@@ -55,6 +63,8 @@ type DBStore interface {
 	PricingStore
 	EscrowStore
 	LsatStore
+	YieldStore
 	Close() error
 	Vacuum(ctx context.Context) error
 }
+

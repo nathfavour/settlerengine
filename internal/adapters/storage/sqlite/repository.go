@@ -71,6 +71,79 @@ func (r *SqliteRepository) migrate() error {
 		nonce VARCHAR(255) NOT NULL,
 		verified_at BIGINT NOT NULL
 	);
+
+	CREATE TABLE IF NOT EXISTS webhook_configs (
+		id VARCHAR(255) PRIMARY KEY,
+		url VARCHAR(512) NOT NULL,
+		secret VARCHAR(255) NOT NULL,
+		events VARCHAR(255) NOT NULL,
+		created_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS webhook_deliveries (
+		id VARCHAR(255) PRIMARY KEY,
+		config_id VARCHAR(255) NOT NULL,
+		payload TEXT NOT NULL,
+		event VARCHAR(100) NOT NULL,
+		status VARCHAR(50) NOT NULL,
+		attempts INT NOT NULL,
+		next_attempt_at BIGINT NOT NULL,
+		created_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS client_reputations (
+		client_address VARCHAR(255) PRIMARY KEY,
+		score INT NOT NULL,
+		total_payments VARCHAR(255) NOT NULL,
+		last_payment_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS pricing_policies (
+		resource_path VARCHAR(255) PRIMARY KEY,
+		base_price VARCHAR(255) NOT NULL,
+		currency VARCHAR(50) NOT NULL,
+		surge_multiplier DOUBLE PRECISION NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS escrows (
+		id VARCHAR(255) PRIMARY KEY,
+		invoice_id VARCHAR(255) NOT NULL,
+		amount VARCHAR(255) NOT NULL,
+		currency VARCHAR(50) NOT NULL,
+		status VARCHAR(50) NOT NULL,
+		delivery_hash VARCHAR(255) NOT NULL,
+		created_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS lsat_challenges (
+		macaroon_id VARCHAR(255) PRIMARY KEY,
+		preimage_hash VARCHAR(255) NOT NULL,
+		preimage VARCHAR(255) NOT NULL,
+		resource_path VARCHAR(255) NOT NULL,
+		amount BIGINT NOT NULL,
+		created_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS yield_strategies (
+		id VARCHAR(255) PRIMARY KEY,
+		provider VARCHAR(255) NOT NULL,
+		vault_address VARCHAR(255) NOT NULL,
+		asset VARCHAR(50) NOT NULL,
+		tvl VARCHAR(255) NOT NULL,
+		apy DOUBLE PRECISION NOT NULL,
+		last_harvest_at BIGINT NOT NULL,
+		status VARCHAR(50) NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS yield_harvests (
+		id VARCHAR(255) PRIMARY KEY,
+		strategy_id VARCHAR(255) NOT NULL,
+		amount VARCHAR(255) NOT NULL,
+		asset VARCHAR(50) NOT NULL,
+		tx_hash VARCHAR(255) NOT NULL,
+		status VARCHAR(50) NOT NULL,
+		harvested_at BIGINT NOT NULL
+	);
 	`
 	_, err := r.database.Exec(schema)
 	return err

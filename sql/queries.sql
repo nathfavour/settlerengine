@@ -101,3 +101,26 @@ WHERE macaroon_id = ?;
 UPDATE lsat_challenges
 SET preimage = ?
 WHERE macaroon_id = ?;
+
+-- name: SaveYieldStrategy :exec
+INSERT OR REPLACE INTO yield_strategies (id, provider, vault_address, asset, tvl, apy, last_harvest_at, status)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetYieldStrategy :one
+SELECT id, provider, vault_address, asset, tvl, apy, last_harvest_at, status
+FROM yield_strategies
+WHERE id = ?;
+
+-- name: GetYieldStrategies :many
+SELECT id, provider, vault_address, asset, tvl, apy, last_harvest_at, status
+FROM yield_strategies;
+
+-- name: RecordYieldHarvest :exec
+INSERT INTO yield_harvests (id, strategy_id, amount, asset, tx_hash, status, harvested_at)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetYieldHarvests :many
+SELECT id, strategy_id, amount, asset, tx_hash, status, harvested_at
+FROM yield_harvests
+WHERE strategy_id = ?;
+
