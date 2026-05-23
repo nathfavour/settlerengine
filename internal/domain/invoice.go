@@ -59,3 +59,16 @@ type WebhookDelivery struct {
 	NextAttemptAt time.Time
 	CreatedAt     time.Time
 }
+
+type ClientReputation struct {
+	ClientAddress string
+	Score         int32
+	TotalPayments Money
+	LastPaymentAt time.Time
+}
+
+type PricingPolicy struct {
+	ResourcePath    string
+	BasePrice       Money
+	SurgeMultiplier float64
+}

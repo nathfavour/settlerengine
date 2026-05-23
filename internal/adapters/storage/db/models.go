@@ -36,3 +36,17 @@ type WebhookDelivery struct {
 	NextAttemptAt int64
 	CreatedAt     int64
 }
+
+type ClientReputation struct {
+	ClientAddress  string
+	Score          int32
+	TotalPayments  string
+	LastPaymentAt  int64
+}
+
+type PricingPolicy struct {
+	ResourcePath    string
+	BasePrice       string
+	Currency        string
+	SurgeMultiplier float64
+}

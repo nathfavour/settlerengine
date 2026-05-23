@@ -307,3 +307,83 @@ func (q *Queries) UpdateWebhookDelivery(ctx context.Context, arg UpdateWebhookDe
 	)
 	return err
 }
+
+const saveClientReputation = `
+INSERT OR REPLACE INTO client_reputations (client_address, score, total_payments, last_payment_at)
+VALUES (?, ?, ?, ?);
+`
+
+type SaveClientReputationParams struct {
+	ClientAddress string
+	Score         int32
+	TotalPayments string
+	LastPaymentAt int64
+}
+
+func (q *Queries) SaveClientReputation(ctx context.Context, arg SaveClientReputationParams) error {
+	_, err := q.db.ExecContext(ctx, saveClientReputation,
+		arg.ClientAddress,
+		arg.Score,
+		arg.TotalPayments,
+		arg.LastPaymentAt,
+	)
+	return err
+}
+
+const getClientReputation = `
+SELECT client_address, score, total_payments, last_payment_at
+FROM client_reputations
+WHERE client_address = ?;
+`
+
+func (q *Queries) GetClientReputation(ctx context.Context, clientAddress string) (ClientReputation, error) {
+	row := q.db.QueryRowContext(ctx, getClientReputation, clientAddress)
+	var i ClientReputation
+	err := row.Scan(
+		&i.ClientAddress,
+		&i.Score,
+		&i.TotalPayments,
+		&i.LastPaymentAt,
+	)
+	return i, err
+}
+
+const savePricingPolicy = `
+INSERT OR REPLACE INTO pricing_policies (resource_path, base_price, currency, surge_multiplier)
+VALUES (?, ?, ?, ?);
+`
+
+type SavePricingPolicyParams struct {
+	ResourcePath    string
+	BasePrice       string
+	Currency        string
+	SurgeMultiplier float64
+}
+
+func (q *Queries) SavePricingPolicy(ctx context.Context, arg SavePricingPolicyParams) error {
+	_, err := q.db.ExecContext(ctx, savePricingPolicy,
+		arg.ResourcePath,
+		arg.BasePrice,
+		arg.Currency,
+		arg.SurgeMultiplier,
+	)
+	return err
+}
+
+const getPricingPolicy = `
+SELECT resource_path, base_price, currency, surge_multiplier
+FROM pricing_policies
+WHERE resource_path = ?;
+`
+
+func (q *Queries) GetPricingPolicy(ctx context.Context, resourcePath string) (PricingPolicy, error) {
+	row := q.db.QueryRowContext(ctx, getPricingPolicy, resourcePath)
+	var i PricingPolicy
+	err := row.Scan(
+		&i.ResourcePath,
+		&i.BasePrice,
+		&i.Currency,
+		&i.SurgeMultiplier,
+	)
+	return i, err
+}

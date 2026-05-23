@@ -34,3 +34,17 @@ CREATE TABLE webhook_deliveries (
     next_attempt_at BIGINT NOT NULL,
     created_at BIGINT NOT NULL
 );
+
+CREATE TABLE client_reputations (
+    client_address VARCHAR(255) PRIMARY KEY,
+    score INT NOT NULL,
+    total_payments VARCHAR(255) NOT NULL,
+    last_payment_at BIGINT NOT NULL
+);
+
+CREATE TABLE pricing_policies (
+    resource_path VARCHAR(255) PRIMARY KEY,
+    base_price VARCHAR(255) NOT NULL,
+    currency VARCHAR(50) NOT NULL,
+    surge_multiplier DOUBLE PRECISION NOT NULL
+);

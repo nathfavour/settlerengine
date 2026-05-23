@@ -55,3 +55,21 @@ WHERE status = 'PENDING' AND next_attempt_at < ?;
 UPDATE webhook_deliveries
 SET status = ?, attempts = ?, next_attempt_at = ?
 WHERE id = ?;
+
+-- name: SaveClientReputation :exec
+INSERT OR REPLACE INTO client_reputations (client_address, score, total_payments, last_payment_at)
+VALUES (?, ?, ?, ?);
+
+-- name: GetClientReputation :one
+SELECT client_address, score, total_payments, last_payment_at
+FROM client_reputations
+WHERE client_address = ?;
+
+-- name: SavePricingPolicy :exec
+INSERT OR REPLACE INTO pricing_policies (resource_path, base_price, currency, surge_multiplier)
+VALUES (?, ?, ?, ?);
+
+-- name: GetPricingPolicy :one
+SELECT resource_path, base_price, currency, surge_multiplier
+FROM pricing_policies
+WHERE resource_path = ?;

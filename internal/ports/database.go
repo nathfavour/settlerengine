@@ -29,10 +29,18 @@ type WebhookStore interface {
 	UpdateDeliveryStatus(ctx context.Context, id string, status string, attempts int32, nextAttemptAt time.Time) error
 }
 
+type PricingStore interface {
+	SaveReputation(ctx context.Context, rep *domain.ClientReputation) error
+	GetReputation(ctx context.Context, clientAddress string) (*domain.ClientReputation, error)
+	SavePolicy(ctx context.Context, policy *domain.PricingPolicy) error
+	GetPolicy(ctx context.Context, resourcePath string) (*domain.PricingPolicy, error)
+}
+
 type DBStore interface {
 	InvoiceStore
 	VerifiedPaymentStore
 	WebhookStore
+	PricingStore
 	Close() error
 	Vacuum(ctx context.Context) error
 }

@@ -246,4 +246,61 @@ func (r *SqliteRepository) UpdateDeliveryStatus(ctx context.Context, id string, 
 	})
 }
 
+func (r *SqliteRepository) SaveReputation(ctx context.Context, rep *domain.ClientReputation) error {
+	return r.queries.SaveClientReputation(ctx, db.SaveClientReputationParams{
+		ClientAddress: rep.ClientAddress,
+		Score:         rep.Score,
+		TotalPayments: rep.TotalPayments.Amount().String(),
+		LastPaymentAt: rep.LastPaymentAt.Unix(),
+	})
+}
+
+func (r *SqliteRepository) GetReputation(ctx context.Context, clientAddress string) (*domain.ClientReputation, error) {
+	row, err := r.queries.GetClientReputation(ctx, clientAddress)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	amountBig := new(big.Int)
+	amountBig.SetString(row.TotalPayments, 10)
+
+	return &domain.ClientReputation{
+		ClientAddress: row.ClientAddress,
+		Score:         row.Score,
+		TotalPayments: domain.NewMoney(amountBig, "USDC"),
+		LastPaymentAt: time.Unix(row.LastPaymentAt, 0),
+	}, nil
+}
+
+func (r *SqliteRepository) SavePolicy(ctx context.Context, policy *domain.PricingPolicy) error {
+	return r.queries.SavePricingPolicy(ctx, db.SavePricingPolicyParams{
+		ResourcePath:    policy.ResourcePath,
+		BasePrice:       policy.BasePrice.Amount().String(),
+		Currency:        policy.BasePrice.Currency(),
+		SurgeMultiplier: policy.SurgeMultiplier,
+	})
+}
+
+func (r *SqliteRepository) GetPolicy(ctx context.Context, resourcePath string) (*domain.PricingPolicy, error) {
+	row, err := r.queries.GetPricingPolicy(ctx, resourcePath)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	amountBig := new(big.Int)
+	amountBig.SetString(row.BasePrice, 10)
+
+	return &domain.PricingPolicy{
+		ResourcePath:    row.ResourcePath,
+		BasePrice:       domain.NewMoney(amountBig, row.Currency),
+		SurgeMultiplier: row.SurgeMultiplier,
+	}, nil
+}
+
 var _ ports.DBStore = (*SqliteRepository)(nil)
