@@ -1,9 +1,1 @@
-go 1.24.0
-
-use (
-	./apps/settler-proxy
-	./apps/settlerd
-	./cmd/settler
-	./core
-	./pkg
-)
+// empty
