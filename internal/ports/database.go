@@ -21,9 +21,18 @@ type VerifiedPaymentStore interface {
 	CheckPayment(ctx context.Context, signature string) (string, error)
 }
 
+type WebhookStore interface {
+	SaveConfig(ctx context.Context, config *domain.WebhookConfig) error
+	GetConfigs(ctx context.Context) ([]*domain.WebhookConfig, error)
+	SaveDelivery(ctx context.Context, delivery *domain.WebhookDelivery) error
+	GetPendingDeliveries(ctx context.Context) ([]*domain.WebhookDelivery, error)
+	UpdateDeliveryStatus(ctx context.Context, id string, status string, attempts int32, nextAttemptAt time.Time) error
+}
+
 type DBStore interface {
 	InvoiceStore
 	VerifiedPaymentStore
+	WebhookStore
 	Close() error
 	Vacuum(ctx context.Context) error
 }

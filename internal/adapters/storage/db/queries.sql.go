@@ -164,3 +164,146 @@ func (q *Queries) CheckVerifiedPayment(ctx context.Context, signature string) (s
 	}
 	return signer, err
 }
+
+const saveWebhookConfig = `
+INSERT INTO webhook_configs (id, url, secret, events, created_at)
+VALUES (?, ?, ?, ?, ?);
+`
+
+type SaveWebhookConfigParams struct {
+	ID        string
+	Url       string
+	Secret    string
+	Events    string
+	CreatedAt int64
+}
+
+func (q *Queries) SaveWebhookConfig(ctx context.Context, arg SaveWebhookConfigParams) error {
+	_, err := q.db.ExecContext(ctx, saveWebhookConfig,
+		arg.ID,
+		arg.Url,
+		arg.Secret,
+		arg.Events,
+		arg.CreatedAt,
+	)
+	return err
+}
+
+const getWebhookConfigs = `
+SELECT id, url, secret, events, created_at
+FROM webhook_configs;
+`
+
+func (q *Queries) GetWebhookConfigs(ctx context.Context) ([]WebhookConfig, error) {
+	rows, err := q.db.QueryContext(ctx, getWebhookConfigs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []WebhookConfig
+	for rows.Next() {
+		var i WebhookConfig
+		if err := rows.Scan(
+			&i.ID,
+			&i.Url,
+			&i.Secret,
+			&i.Events,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const saveWebhookDelivery = `
+INSERT INTO webhook_deliveries (id, config_id, payload, event, status, attempts, next_attempt_at, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+`
+
+type SaveWebhookDeliveryParams struct {
+	ID            string
+	ConfigID      string
+	Payload       string
+	Event         string
+	Status        string
+	Attempts      int32
+	NextAttemptAt int64
+	CreatedAt     int64
+}
+
+func (q *Queries) SaveWebhookDelivery(ctx context.Context, arg SaveWebhookDeliveryParams) error {
+	_, err := q.db.ExecContext(ctx, saveWebhookDelivery,
+		arg.ID,
+		arg.ConfigID,
+		arg.Payload,
+		arg.Event,
+		arg.Status,
+		arg.Attempts,
+		arg.NextAttemptAt,
+		arg.CreatedAt,
+	)
+	return err
+}
+
+const getPendingWebhookDeliveries = `
+SELECT id, config_id, payload, event, status, attempts, next_attempt_at, created_at
+FROM webhook_deliveries
+WHERE status = 'PENDING' AND next_attempt_at < ?;
+`
+
+func (q *Queries) GetPendingWebhookDeliveries(ctx context.Context, nextAttemptAt int64) ([]WebhookDelivery, error) {
+	rows, err := q.db.QueryContext(ctx, getPendingWebhookDeliveries, nextAttemptAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []WebhookDelivery
+	for rows.Next() {
+		var i WebhookDelivery
+		if err := rows.Scan(
+			&i.ID,
+			&i.ConfigID,
+			&i.Payload,
+			&i.Event,
+			&i.Status,
+			&i.Attempts,
+			&i.NextAttemptAt,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateWebhookDelivery = `
+UPDATE webhook_deliveries
+SET status = ?, attempts = ?, next_attempt_at = ?
+WHERE id = ?;
+`
+
+type UpdateWebhookDeliveryParams struct {
+	Status        string
+	Attempts      int32
+	NextAttemptAt int64
+	ID            string
+}
+
+func (q *Queries) UpdateWebhookDelivery(ctx context.Context, arg UpdateWebhookDeliveryParams) error {
+	_, err := q.db.ExecContext(ctx, updateWebhookDelivery,
+		arg.Status,
+		arg.Attempts,
+		arg.NextAttemptAt,
+		arg.ID,
+	)
+	return err
+}

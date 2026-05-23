@@ -40,3 +40,22 @@ type VerifiedPayment struct {
 	Nonce      string
 	VerifiedAt time.Time
 }
+
+type WebhookConfig struct {
+	ID        string
+	Url       string
+	Secret    string
+	Events    string
+	CreatedAt time.Time
+}
+
+type WebhookDelivery struct {
+	ID            string
+	ConfigID      string
+	Payload       string
+	Event         string
+	Status        string
+	Attempts      int32
+	NextAttemptAt time.Time
+	CreatedAt     time.Time
+}

@@ -175,4 +175,75 @@ func (r *SqliteRepository) CheckPayment(ctx context.Context, signature string) (
 	return r.queries.CheckVerifiedPayment(ctx, signature)
 }
 
+func (r *SqliteRepository) SaveConfig(ctx context.Context, config *domain.WebhookConfig) error {
+	return r.queries.SaveWebhookConfig(ctx, db.SaveWebhookConfigParams{
+		ID:        config.ID,
+		Url:       config.Url,
+		Secret:    config.Secret,
+		Events:    config.Events,
+		CreatedAt: config.CreatedAt.Unix(),
+	})
+}
+
+func (r *SqliteRepository) GetConfigs(ctx context.Context) ([]*domain.WebhookConfig, error) {
+	rows, err := r.queries.GetWebhookConfigs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	configs := make([]*domain.WebhookConfig, len(rows))
+	for i, row := range rows {
+		configs[i] = &domain.WebhookConfig{
+			ID:        row.ID,
+			Url:       row.Url,
+			Secret:    row.Secret,
+			Events:    row.Events,
+			CreatedAt: time.Unix(row.CreatedAt, 0),
+		}
+	}
+	return configs, nil
+}
+
+func (r *SqliteRepository) SaveDelivery(ctx context.Context, delivery *domain.WebhookDelivery) error {
+	return r.queries.SaveWebhookDelivery(ctx, db.SaveWebhookDeliveryParams{
+		ID:            delivery.ID,
+		ConfigID:      delivery.ConfigID,
+		Payload:       delivery.Payload,
+		Event:         delivery.Event,
+		Status:        delivery.Status,
+		Attempts:      delivery.Attempts,
+		NextAttemptAt: delivery.NextAttemptAt.Unix(),
+		CreatedAt:     delivery.CreatedAt.Unix(),
+	})
+}
+
+func (r *SqliteRepository) GetPendingDeliveries(ctx context.Context) ([]*domain.WebhookDelivery, error) {
+	rows, err := r.queries.GetPendingWebhookDeliveries(ctx, time.Now().Unix())
+	if err != nil {
+		return nil, err
+	}
+	deliveries := make([]*domain.WebhookDelivery, len(rows))
+	for i, row := range rows {
+		deliveries[i] = &domain.WebhookDelivery{
+			ID:            row.ID,
+			ConfigID:      row.ConfigID,
+			Payload:       row.Payload,
+			Event:         row.Event,
+			Status:        row.Status,
+			Attempts:      row.Attempts,
+			NextAttemptAt: time.Unix(row.NextAttemptAt, 0),
+			CreatedAt:     time.Unix(row.CreatedAt, 0),
+		}
+	}
+	return deliveries, nil
+}
+
+func (r *SqliteRepository) UpdateDeliveryStatus(ctx context.Context, id string, status string, attempts int32, nextAttemptAt time.Time) error {
+	return r.queries.UpdateWebhookDelivery(ctx, db.UpdateWebhookDeliveryParams{
+		Status:        status,
+		Attempts:      attempts,
+		NextAttemptAt: nextAttemptAt.Unix(),
+		ID:            id,
+	})
+}
+
 var _ ports.DBStore = (*SqliteRepository)(nil)
