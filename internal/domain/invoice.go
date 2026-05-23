@@ -90,3 +90,24 @@ type LsatChallenge struct {
 	Amount       int64
 	CreatedAt    time.Time
 }
+
+type YieldStrategy struct {
+	ID           string
+	Provider     string
+	VaultAddress string
+	Asset        string
+	TVL          Money
+	APY          float64
+	LastHarvest  time.Time
+	Status       string
+}
+
+type YieldHarvest struct {
+	ID          string
+	StrategyID  string
+	Amount      Money
+	TxHash      string
+	Status      string
+	HarvestedAt time.Time
+}
+
