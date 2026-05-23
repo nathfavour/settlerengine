@@ -1,11 +1,7 @@
 package service
 
 import (
-	"context"
-	"fmt"
 	"sync"
-
-	"github.com/nathfavour/settlerengine/core/domain/model"
 )
 
 // Event is a simple representation of a domain event.

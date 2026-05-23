@@ -23,14 +23,15 @@ SettlerEngine aims to be the sovereign settlement layer for the AI economy. Whil
 
 ### 4. Technical Debt & Implementation Gaps
 - [x] **Event Bus:** Integrate Watermill for decoupled communication between `SettlementEngine` and `YieldService`. (Moved from Architecture)
-- [ ] **Robust ERC-4337:** Complete the Account Abstraction provider for gasless automation and restricted session keys.
-- [ ] **Yield Withdrawals:** Implement the `WithdrawFromYield` method in the `RiquidAdapter`.
+- [x] **Robust ERC-4337:** Complete the Account Abstraction provider for gasless automation and restricted session keys.
+- [x] **Yield Withdrawals:** Implement the `WithdrawFromYield` method in the `RiquidAdapter`.
 - [ ] **State Persistence:** Ensure the SQLite backend tracks Yield TVL and historical earnings accurately.
 
 ## ✅ Completed Tasks (Cleaned up from previous phases)
 - [x] x402 Middleware for HTTP 402 Handshakes.
 - [x] EIP-712 Intent-to-Pay verification.
 - [x] Hexagonal Core (Invoice, Money, Settlement domains).
-- [x] Basic Riquid Yield Adapter skeleton.
+- [x] Full Riquid Yield Adapter with contract bindings.
 - [x] Background Harvesting Worker.
 - [x] Multi-chain RPC Client wrapper.
+- [x] ERC-4337 Account Abstraction & Paymaster Port implementations.

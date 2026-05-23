@@ -113,3 +113,38 @@ func TestYieldService_AutoHarvestWorker(t *testing.T) {
 		t.Error("Expected harvest to be called")
 	}
 }
+
+func TestYieldService_ListenForSettlements(t *testing.T) {
+	provider := &mockYieldProvider{}
+	engine := &mockSettlementEngine{}
+	bus := NewLocalBus()
+	svc := NewYieldService(engine, provider, big.NewInt(0))
+
+	strategy := model.YieldStrategy{
+		ID:           "test_strategy",
+		VaultAddress: "0xvault",
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+
+	// Start listening
+	go svc.ListenForSettlements(ctx, bus, strategy, 100.0)
+
+	// Publish settlement event
+	inv := &model.Invoice{
+		ID:     "inv_event_1",
+		Amount: money.New(big.NewInt(100), "USDT"),
+		Status: model.StatusSettled,
+	}
+	
+	time.Sleep(50 * time.Millisecond) // Give worker time to subscribe
+	bus.Publish(EventSettlementConfirmed, inv)
+
+	// Wait for event processing
+	time.Sleep(100 * time.Millisecond)
+
+	if provider.depositedAmount.Amount().Cmp(big.NewInt(100)) != 0 {
+		t.Errorf("Expected 100 deposited via event, got %s", provider.depositedAmount.Amount().String())
+	}
+}

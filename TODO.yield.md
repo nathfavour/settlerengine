@@ -10,11 +10,12 @@ This roadmap outlines the integration of the Riquid Self-Driving Yield Engine in
 ## Phase 2: BSC Infrastructure & Adapters (`pkg/chains`) ⛓️
 - [x] **BSC RPC Provider:** Implement a Geth-compatible provider for BNB Smart Chain (BSC).
 - [x] **Asset Support:** Add configuration and tracking for BNB, USDT (BEP-20), and BUSD.
-- [ ] **Contract Bindings:** Generate Go ABIs/bindings for Riquid Vaults and AsterDEX Earn contracts.
+- [x] **Contract Bindings:** Generate Go ABIs/bindings for Riquid Vaults.
 
 ## Phase 3: Riquid Driven Adapter (`pkg/yield`) 💸
-- [/] **`riquid_adapter.go`:** Implementation of the `YieldProvider` interface for Riquid Yield Engine (Manual ABI calls + Metrics).
-- [ ] **State Machine Integration:** Logic to encode/decode calls to Riquid strategy contracts.
+- [x] **`riquid_adapter.go`:** Implementation of the `YieldProvider` interface for Riquid Yield Engine using generated bindings.
+- [x] **Withdrawal Logic:** Implement `WithdrawFromYield` method.
+- [x] **State Machine Integration:** Logic to encode/decode calls to Riquid strategy contracts via bindings.
 
 ## Phase 4: Self-Driving Yield Automation (`core/domain/service`) 🤖
 - [x] **Auto-Route Service:** Implementation of routing logic upon `SETTLEMENT_CONFIRMED` events.
@@ -23,13 +24,13 @@ This roadmap outlines the integration of the Riquid Self-Driving Yield Engine in
 - [x] **Event Bus Wiring:** Settlement events are now published via `LocalBus` and consumed by `YieldService`.
 
 ## Phase 5: Account Abstraction & Session Keys (`pkg/crypto` & `pkg/yield`) 🔐
-- [/] **ERC-4337 Integration:** Logic to manage funds via non-custodial account abstraction (Skeleton).
+- [x] **ERC-4337 Integration:** Logic to manage funds via non-custodial account abstraction (Provider + UserOps).
 - [x] **Session Key Manager:** Sign "Harvest" and "Reinvest" transactions using restricted-scope keys.
-- [/] **Paymaster Integration:** Support for gas sponsorship on BSC via `Paymaster` client (Port defined).
+- [x] **Paymaster Integration:** Support for gas sponsorship on BSC via `Paymaster` client.
 
 ## Phase 6: Observability & Validation (`pkg/metrics`) 📊
 - [x] **Prometheus Metrics:** Track APY performance, total value locked (TVL) in yield, and "Time-to-Settle".
-- [x] **Integration Tests & Wiring:** End-to-end wiring in `settlerd`, unit tests for yield logic, and mock adapters.
+- [x] **Integration Tests & Wiring:** End-to-end wiring in `settlerd`, unit tests for yield logic, and event-driven routing tests.
 
 ---
 **Core Requirement:** All implementations must maintain the **Non-Custodial** nature of SettlerEngine. Automation must be achieved through cryptographic delegation (Session Keys), not centralized management.
