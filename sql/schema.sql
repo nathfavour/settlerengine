@@ -15,3 +15,22 @@ CREATE TABLE verified_payments (
     nonce VARCHAR(255) NOT NULL,
     verified_at BIGINT NOT NULL
 );
+
+CREATE TABLE webhook_configs (
+    id VARCHAR(255) PRIMARY KEY,
+    url VARCHAR(512) NOT NULL,
+    secret VARCHAR(255) NOT NULL,
+    events VARCHAR(255) NOT NULL,
+    created_at BIGINT NOT NULL
+);
+
+CREATE TABLE webhook_deliveries (
+    id VARCHAR(255) PRIMARY KEY,
+    config_id VARCHAR(255) NOT NULL,
+    payload TEXT NOT NULL,
+    event VARCHAR(100) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    attempts INT NOT NULL,
+    next_attempt_at BIGINT NOT NULL,
+    created_at BIGINT NOT NULL
+);

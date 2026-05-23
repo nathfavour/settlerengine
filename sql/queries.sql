@@ -33,3 +33,25 @@ VALUES (?, ?, ?, ?, ?, ?);
 SELECT signer
 FROM verified_payments
 WHERE signature = ?;
+
+-- name: SaveWebhookConfig :exec
+INSERT INTO webhook_configs (id, url, secret, events, created_at)
+VALUES (?, ?, ?, ?, ?);
+
+-- name: GetWebhookConfigs :many
+SELECT id, url, secret, events, created_at
+FROM webhook_configs;
+
+-- name: SaveWebhookDelivery :exec
+INSERT INTO webhook_deliveries (id, config_id, payload, event, status, attempts, next_attempt_at, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetPendingWebhookDeliveries :many
+SELECT id, config_id, payload, event, status, attempts, next_attempt_at, created_at
+FROM webhook_deliveries
+WHERE status = 'PENDING' AND next_attempt_at < ?;
+
+-- name: UpdateWebhookDelivery :exec
+UPDATE webhook_deliveries
+SET status = ?, attempts = ?, next_attempt_at = ?
+WHERE id = ?;
