@@ -57,6 +57,79 @@ func (r *PostgresRepository) migrate() error {
 		nonce VARCHAR(255) NOT NULL,
 		verified_at BIGINT NOT NULL
 	);
+
+	CREATE TABLE IF NOT EXISTS webhook_configs (
+		id VARCHAR(255) PRIMARY KEY,
+		url VARCHAR(512) NOT NULL,
+		secret VARCHAR(255) NOT NULL,
+		events VARCHAR(255) NOT NULL,
+		created_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS webhook_deliveries (
+		id VARCHAR(255) PRIMARY KEY,
+		config_id VARCHAR(255) NOT NULL,
+		payload TEXT NOT NULL,
+		event VARCHAR(100) NOT NULL,
+		status VARCHAR(50) NOT NULL,
+		attempts INT NOT NULL,
+		next_attempt_at BIGINT NOT NULL,
+		created_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS client_reputations (
+		client_address VARCHAR(255) PRIMARY KEY,
+		score INT NOT NULL,
+		total_payments VARCHAR(255) NOT NULL,
+		last_payment_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS pricing_policies (
+		resource_path VARCHAR(255) PRIMARY KEY,
+		base_price VARCHAR(255) NOT NULL,
+		currency VARCHAR(50) NOT NULL,
+		surge_multiplier DOUBLE PRECISION NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS escrows (
+		id VARCHAR(255) PRIMARY KEY,
+		invoice_id VARCHAR(255) NOT NULL,
+		amount VARCHAR(255) NOT NULL,
+		currency VARCHAR(50) NOT NULL,
+		status VARCHAR(50) NOT NULL,
+		delivery_hash VARCHAR(255) NOT NULL,
+		created_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS lsat_challenges (
+		macaroon_id VARCHAR(255) PRIMARY KEY,
+		preimage_hash VARCHAR(255) NOT NULL,
+		preimage VARCHAR(255) NOT NULL,
+		resource_path VARCHAR(255) NOT NULL,
+		amount BIGINT NOT NULL,
+		created_at BIGINT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS yield_strategies (
+		id VARCHAR(255) PRIMARY KEY,
+		provider VARCHAR(255) NOT NULL,
+		vault_address VARCHAR(255) NOT NULL,
+		asset VARCHAR(50) NOT NULL,
+		tvl VARCHAR(255) NOT NULL,
+		apy DOUBLE PRECISION NOT NULL,
+		last_harvest_at BIGINT NOT NULL,
+		status VARCHAR(50) NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS yield_harvests (
+		id VARCHAR(255) PRIMARY KEY,
+		strategy_id VARCHAR(255) NOT NULL,
+		amount VARCHAR(255) NOT NULL,
+		asset VARCHAR(50) NOT NULL,
+		tx_hash VARCHAR(255) NOT NULL,
+		status VARCHAR(50) NOT NULL,
+		harvested_at BIGINT NOT NULL
+	);
 	`
 	_, err := r.database.Exec(schema)
 	return err
@@ -367,4 +440,102 @@ func (r *PostgresRepository) UpdateLsatChallengePreimage(ctx context.Context, ma
 	})
 }
 
+func (r *PostgresRepository) SaveYieldStrategy(ctx context.Context, strategy *domain.YieldStrategy) error {
+	return r.queries.SaveYieldStrategy(ctx, db.SaveYieldStrategyParams{
+		ID:            strategy.ID,
+		Provider:      strategy.Provider,
+		VaultAddress:  strategy.VaultAddress,
+		Asset:         strategy.Asset,
+		Tvl:           strategy.TVL.Amount().String(),
+		Apy:           strategy.APY,
+		LastHarvestAt: strategy.LastHarvest.Unix(),
+		Status:        strategy.Status,
+	})
+}
+
+func (r *PostgresRepository) GetYieldStrategy(ctx context.Context, id string) (*domain.YieldStrategy, error) {
+	row, err := r.queries.GetYieldStrategy(ctx, id)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	amountBig := new(big.Int)
+	amountBig.SetString(row.Tvl, 10)
+
+	return &domain.YieldStrategy{
+		ID:           row.ID,
+		Provider:     row.Provider,
+		VaultAddress: row.VaultAddress,
+		Asset:        row.Asset,
+		TVL:          domain.NewMoney(amountBig, row.Asset),
+		APY:          row.Apy,
+		LastHarvest:  time.Unix(row.LastHarvestAt, 0),
+		Status:       row.Status,
+	}, nil
+}
+
+func (r *PostgresRepository) GetYieldStrategies(ctx context.Context) ([]*domain.YieldStrategy, error) {
+	rows, err := r.queries.GetYieldStrategies(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	strategies := make([]*domain.YieldStrategy, len(rows))
+	for i, row := range rows {
+		amountBig := new(big.Int)
+		amountBig.SetString(row.Tvl, 10)
+
+		strategies[i] = &domain.YieldStrategy{
+			ID:           row.ID,
+			Provider:     row.Provider,
+			VaultAddress: row.VaultAddress,
+			Asset:        row.Asset,
+			TVL:          domain.NewMoney(amountBig, row.Asset),
+			APY:          row.Apy,
+			LastHarvest:  time.Unix(row.LastHarvestAt, 0),
+			Status:       row.Status,
+		}
+	}
+	return strategies, nil
+}
+
+func (r *PostgresRepository) RecordYieldHarvest(ctx context.Context, harvest *domain.YieldHarvest) error {
+	return r.queries.RecordYieldHarvest(ctx, db.RecordYieldHarvestParams{
+		ID:          harvest.ID,
+		StrategyID:  harvest.StrategyID,
+		Amount:      harvest.Amount.Amount().String(),
+		Asset:       harvest.Amount.Currency(),
+		TxHash:      harvest.TxHash,
+		Status:      harvest.Status,
+		HarvestedAt: harvest.HarvestedAt.Unix(),
+	})
+}
+
+func (r *PostgresRepository) GetYieldHarvests(ctx context.Context, strategyID string) ([]*domain.YieldHarvest, error) {
+	rows, err := r.queries.GetYieldHarvests(ctx, strategyID)
+	if err != nil {
+		return nil, err
+	}
+
+	harvests := make([]*domain.YieldHarvest, len(rows))
+	for i, row := range rows {
+		amountBig := new(big.Int)
+		amountBig.SetString(row.Amount, 10)
+
+		harvests[i] = &domain.YieldHarvest{
+			ID:          row.ID,
+			StrategyID:  row.StrategyID,
+			Amount:      domain.NewMoney(amountBig, row.Asset),
+			TxHash:      row.TxHash,
+			Status:      row.Status,
+			HarvestedAt: time.Unix(row.HarvestedAt, 0),
+		}
+	}
+	return harvests, nil
+}
+
 var _ ports.DBStore = (*PostgresRepository)(nil)
+

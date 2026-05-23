@@ -454,4 +454,102 @@ func (r *SqliteRepository) UpdateLsatChallengePreimage(ctx context.Context, maca
 	})
 }
 
+func (r *SqliteRepository) SaveYieldStrategy(ctx context.Context, strategy *domain.YieldStrategy) error {
+	return r.queries.SaveYieldStrategy(ctx, db.SaveYieldStrategyParams{
+		ID:            strategy.ID,
+		Provider:      strategy.Provider,
+		VaultAddress:  strategy.VaultAddress,
+		Asset:         strategy.Asset,
+		Tvl:           strategy.TVL.Amount().String(),
+		Apy:           strategy.APY,
+		LastHarvestAt: strategy.LastHarvest.Unix(),
+		Status:        strategy.Status,
+	})
+}
+
+func (r *SqliteRepository) GetYieldStrategy(ctx context.Context, id string) (*domain.YieldStrategy, error) {
+	row, err := r.queries.GetYieldStrategy(ctx, id)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	amountBig := new(big.Int)
+	amountBig.SetString(row.Tvl, 10)
+
+	return &domain.YieldStrategy{
+		ID:           row.ID,
+		Provider:     row.Provider,
+		VaultAddress: row.VaultAddress,
+		Asset:        row.Asset,
+		TVL:          domain.NewMoney(amountBig, row.Asset),
+		APY:          row.Apy,
+		LastHarvest:  time.Unix(row.LastHarvestAt, 0),
+		Status:       row.Status,
+	}, nil
+}
+
+func (r *SqliteRepository) GetYieldStrategies(ctx context.Context) ([]*domain.YieldStrategy, error) {
+	rows, err := r.queries.GetYieldStrategies(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	strategies := make([]*domain.YieldStrategy, len(rows))
+	for i, row := range rows {
+		amountBig := new(big.Int)
+		amountBig.SetString(row.Tvl, 10)
+
+		strategies[i] = &domain.YieldStrategy{
+			ID:           row.ID,
+			Provider:     row.Provider,
+			VaultAddress: row.VaultAddress,
+			Asset:        row.Asset,
+			TVL:          domain.NewMoney(amountBig, row.Asset),
+			APY:          row.Apy,
+			LastHarvest:  time.Unix(row.LastHarvestAt, 0),
+			Status:       row.Status,
+		}
+	}
+	return strategies, nil
+}
+
+func (r *SqliteRepository) RecordYieldHarvest(ctx context.Context, harvest *domain.YieldHarvest) error {
+	return r.queries.RecordYieldHarvest(ctx, db.RecordYieldHarvestParams{
+		ID:          harvest.ID,
+		StrategyID:  harvest.StrategyID,
+		Amount:      harvest.Amount.Amount().String(),
+		Asset:       harvest.Amount.Currency(),
+		TxHash:      harvest.TxHash,
+		Status:      harvest.Status,
+		HarvestedAt: harvest.HarvestedAt.Unix(),
+	})
+}
+
+func (r *SqliteRepository) GetYieldHarvests(ctx context.Context, strategyID string) ([]*domain.YieldHarvest, error) {
+	rows, err := r.queries.GetYieldHarvests(ctx, strategyID)
+	if err != nil {
+		return nil, err
+	}
+
+	harvests := make([]*domain.YieldHarvest, len(rows))
+	for i, row := range rows {
+		amountBig := new(big.Int)
+		amountBig.SetString(row.Amount, 10)
+
+		harvests[i] = &domain.YieldHarvest{
+			ID:          row.ID,
+			StrategyID:  row.StrategyID,
+			Amount:      domain.NewMoney(amountBig, row.Asset),
+			TxHash:      row.TxHash,
+			Status:      row.Status,
+			HarvestedAt: time.Unix(row.HarvestedAt, 0),
+		}
+	}
+	return harvests, nil
+}
+
 var _ ports.DBStore = (*SqliteRepository)(nil)
+
