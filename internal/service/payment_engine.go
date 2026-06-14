@@ -11,15 +11,38 @@ import (
 )
 
 type PaymentEngine struct {
-	store   ports.DBStore
-	watcher ports.BlockchainWatcher
+	store    ports.DBStore
+	watcher  ports.BlockchainWatcher
+	registry ports.AgentRegistry
 }
 
-func NewPaymentEngine(store ports.DBStore, watcher ports.BlockchainWatcher) *PaymentEngine {
+func NewPaymentEngine(store ports.DBStore, watcher ports.BlockchainWatcher, registry ports.AgentRegistry) *PaymentEngine {
 	return &PaymentEngine{
-		store:   store,
-		watcher: watcher,
+		store:    store,
+		watcher:  watcher,
+		registry: registry,
 	}
+}
+
+// CloseSettlementLoop handles post-settlement actions like ERC-8004 reputation updates.
+func (e *PaymentEngine) CloseSettlementLoop(ctx context.Context, invoiceID string, success bool) error {
+	invoice, err := e.store.FindByID(ctx, invoiceID)
+	if err != nil || invoice == nil {
+		return err
+	}
+
+	if success && e.registry != nil {
+		// In a real scenario, we would retrieve the AgentID associated with the invoice.
+		// For now, we'll simulate posting a positive feedback if it was an agentic payment.
+		fmt.Printf("🏆 ERC-8004: Closing settlement loop for invoice %s. Posting reputation update...\n", invoiceID)
+		
+		// Placeholder: Assume agent ID 42
+		agentID := big.NewInt(42)
+		score := big.NewInt(1) // +1 point for successful settlement
+		_ = e.registry.PostFeedback(ctx, agentID, score, []string{"payment", "settled"}, "")
+	}
+
+	return nil
 }
 
 func (e *PaymentEngine) CreateInvoice(ctx context.Context, amount domain.Money, duration time.Duration) (*domain.Invoice, error) {
@@ -62,6 +85,7 @@ func (e *PaymentEngine) VerifyInvoicePayment(ctx context.Context, id string, net
 
 	if success {
 		_ = e.store.UpdateStatus(ctx, id, domain.StatusSettled)
+		_ = e.CloseSettlementLoop(ctx, id, true)
 		return true, txHash, nil
 	}
 

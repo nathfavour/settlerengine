@@ -16,6 +16,7 @@ const (
 
 type Invoice struct {
 	ID        string
+	AgentID   string // ERC-8004 Global ID
 	Amount    Money
 	Status    InvoiceStatus
 	CreatedAt time.Time

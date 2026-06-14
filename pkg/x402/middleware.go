@@ -3,11 +3,14 @@ package x402
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"math/big"
 	"net/http"
 	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/nathfavour/settlerengine/internal/ports"
 	"github.com/nathfavour/settlerengine/pkg/crypto"
 	"github.com/nathfavour/settlerengine/pkg/storage"
 )
@@ -16,6 +19,7 @@ type contextKey string
 
 const (
 	SignerContextKey contextKey = "x402-signer"
+	AgentContextKey  contextKey = "x402-agent"
 )
 
 // Config defines the configuration for the x402 middleware.
@@ -27,6 +31,8 @@ type Config struct {
 	Amount        string
 	PriceResolver PriceResolver
 	DB            *storage.DB
+	Registry      ports.AgentRegistry
+	MinReputation *big.Int // Optional: block agents with score below this
 }
 
 // PriceResolver dynamically determines the payment requirements for a request.
@@ -55,6 +61,12 @@ func NewMiddleware(cfg Config) *Middleware {
 // GetSigner returns the recovered signer address from the request context.
 func GetSigner(ctx context.Context) (common.Address, bool) {
 	addr, ok := ctx.Value(SignerContextKey).(common.Address)
+	return addr, ok
+}
+
+// GetAgent returns the recovered agent identity from the request context.
+func GetAgent(ctx context.Context) (*common.Address, bool) {
+	addr, ok := ctx.Value(AgentContextKey).(*common.Address)
 	return addr, ok
 }
 
@@ -87,6 +99,23 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 				// 4. Verify Signature
 				recovered, err := crypto.VerifyIntentToPay(payload.Intent, payload.Signature, m.config.DomainParams)
 				if err == nil && recovered.Hex() != "" {
+					// 4a. ERC-8004 Trust Checks
+					if m.config.Registry != nil {
+						// For this demo, we assume the agent ID is passed or mapped from the recovered address.
+						// In reality, we'd lookup the tokenId owned by 'recovered'.
+						// Placeholder: assume tokenId 42
+						agentID := big.NewInt(42) 
+						
+						rep, err := m.config.Registry.GetReputation(r.Context(), agentID)
+						if err == nil && m.config.MinReputation != nil {
+							if rep.Score.Cmp(m.config.MinReputation) < 0 {
+								http.Error(w, fmt.Sprintf("Agent reputation too low: %s", rep.Score.String()), http.StatusForbidden)
+								return
+							}
+						}
+						fmt.Printf("🔍 ERC-8004: Agent %s verified with reputation score %s\n", agentID.String(), rep.Score.String())
+					}
+
 					// Authorized!
 					m.verified.Store(payload.Signature, recovered)
 

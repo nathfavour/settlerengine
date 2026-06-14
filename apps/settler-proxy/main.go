@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/nathfavour/settlerengine/internal/adapters/crypto/erc8004"
 	"github.com/nathfavour/settlerengine/pkg/crypto"
 	"github.com/nathfavour/settlerengine/pkg/x402"
 )
@@ -21,8 +22,18 @@ func main() {
 	chainID := flag.Int64("chain-id", 84532, "Chain ID (default Base Sepolia)")
 	asset := flag.String("asset", "0x036CbD53842c5426634e7929541eC2318f3dCF7e", "Asset address (USDC)")
 	amount := flag.String("amount", "1000000", "Amount in atomic units")
+	rpcURL := flag.String("rpc", "https://sepolia.base.org", "Ethereum RPC URL")
 
 	flag.Parse()
+
+	// 1. Initialize ERC-8004 Registry
+	// Placeholder addresses for Base Sepolia
+	registry, _ := erc8004.NewRegistryClient(
+		*rpcURL,
+		common.HexToAddress("0x8004000000000000000000000000000000000001"), // Identity
+		common.HexToAddress("0x8004000000000000000000000000000000000002"), // Reputation
+		common.HexToAddress("0x8004000000000000000000000000000000000003"), // Validation
+	)
 
 	targetURL, err := url.Parse(*target)
 	if err != nil {
@@ -40,6 +51,8 @@ func main() {
 		Recipient:   *recipient,
 		Asset:       *asset,
 		Amount:      *amount,
+		Registry:    registry,
+		MinReputation: big.NewInt(50), // Require at least 0.50 reputation
 	}
 
 	mw := x402.NewMiddleware(cfg)
