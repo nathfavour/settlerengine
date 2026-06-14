@@ -29,19 +29,24 @@ type SessionKeySigner struct {
 // PolicySigner wraps a SessionKeySigner with a policy.
 type PolicySigner struct {
 	*SessionKeySigner
-	policy Policy
+	Policy Policy
 }
 
 func NewPolicySigner(signer *SessionKeySigner, policy Policy) *PolicySigner {
 	return &PolicySigner{
 		SessionKeySigner: signer,
-		policy:           policy,
+		Policy:           policy,
 	}
+}
+
+// Check delegates the check to the underlying policy.
+func (s *PolicySigner) Check(amount *big.Int, recipient common.Address) error {
+	return s.Policy.Check(amount, recipient)
 }
 
 // GetTransactorWithPolicy returns a transactor only if the policy allows the transaction.
 func (s *PolicySigner) GetTransactorWithPolicy(ctx context.Context, client *ethclient.Client, amount *big.Int, recipient common.Address) (*bind.TransactOpts, error) {
-	if err := s.policy.Check(amount, recipient); err != nil {
+	if err := s.Policy.Check(amount, recipient); err != nil {
 		return nil, fmt.Errorf("policy violation: %w", err)
 	}
 
@@ -55,7 +60,7 @@ func (s *PolicySigner) GetTransactorWithPolicy(ctx context.Context, client *ethc
 	// Wrap the signer to record the update on success
 	// Note: In a real implementation, we'd only record once the tx is confirmed.
 	// For this lightweight fix, we'll record it when the transactor is requested.
-	s.policy.RecordUpdate(amount)
+	s.Policy.RecordUpdate(amount)
 
 	return auth, nil
 }

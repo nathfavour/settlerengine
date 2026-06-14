@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/nathfavour/settlerengine/internal/domain"
 	"github.com/nathfavour/settlerengine/pkg/anyisland"
 	"github.com/nathfavour/settlerengine/pkg/crypto"
 	"github.com/nathfavour/settlerengine/pkg/storage"
@@ -38,6 +39,8 @@ func main() {
 		runProxy(os.Args[2:])
 	case "facilitator":
 		runFacilitator(os.Args[2:])
+	case "pay":
+		runPay(os.Args[2:])
 	case "help":
 		printUsage()
 	default:
@@ -54,7 +57,44 @@ func printUsage() {
 	fmt.Println("\nCommands:")
 	fmt.Println("  proxy        Start the x402 reverse proxy")
 	fmt.Println("  facilitator  Start the settlement facilitator daemon")
+	fmt.Println("  pay          Execute a policy-protected payment")
 	fmt.Println("  help         Show this help message")
+}
+
+func runPay(args []string) {
+	fs := flag.NewFlagSet("pay", flag.ExitOnError)
+	fs.String("rpc", "https://sepolia.base.org", "Ethereum RPC URL")
+	to := fs.String("to", "", "Recipient address")
+	amountStr := fs.String("amount", "0", "Amount in wei")
+	privKey := fs.String("key", "", "Private key (hex)")
+	maxPerTx := fs.String("max-per-tx", "1000000000000000000", "Max wei per transaction (1 ETH)")
+	fs.Parse(args)
+
+	if *to == "" || *privKey == "" {
+		log.Fatal("Recipient (-to) and Private Key (-key) are required")
+	}
+
+	chainID := big.NewInt(84532) // Base Sepolia
+	signer, err := crypto.NewSessionKeySigner(*privKey, chainID)
+	if err != nil {
+		log.Fatalf("Invalid signer: %v", err)
+	}
+
+	max, _ := new(big.Int).SetString(*maxPerTx, 10)
+	policy := domain.NewPaymentPolicy("cli-policy", max, nil, time.Time{})
+
+	policySigner := crypto.NewPolicySigner(signer, policy)
+	
+	amount, _ := new(big.Int).SetString(*amountStr, 10)
+	recipient := common.HexToAddress(*to)
+
+	// In a real CLI, we would use policySigner.GetTransactorWithPolicy
+	if err := policySigner.Check(amount, recipient); err != nil {
+		log.Fatalf("❌ Policy Blocked Payment: %v", err)
+	}
+
+	fmt.Printf("✅ Policy Approved Payment of %s wei to %s\n", amount.String(), recipient.Hex())
+	fmt.Println("Executing transaction... (Simulated for this demo)")
 }
 
 func runProxy(args []string) {
