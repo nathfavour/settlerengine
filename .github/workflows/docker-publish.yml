@@ -13,9 +13,12 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  # Set to 1 to enable builds, 0 to disable for rapid iterations
+  BUILD_ENABLED: 1
 
 jobs:
   build-and-push:
+    if: github.env.BUILD_ENABLED == '1' || vars.BUILD_ENABLED == '1'
     runs-on: ubuntu-latest
     permissions:
       contents: read
