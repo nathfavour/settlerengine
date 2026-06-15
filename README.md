@@ -90,5 +90,31 @@ For a deep dive, see the [Architecture Documentation](./docs/docs/architecture.m
 
 ---
 
-## 📜 License
-MIT License. See [LICENSE](LICENSE) for details.
+## 🏆 Mantle Turing Test Hackathon 2026 Integration
+
+SettlerEngine has been extended to natively support the **Mantle Network** as part of the Turing Test Hackathon, bridging high-speed settlement with on-chain agent trust and verifiable reputation.
+
+### ⚓ On-Chain Logging (Mantle Sepolia)
+A **Logging & Settlement Registry** is deployed to Mantle Sepolia to provide an immutable, verifiable footprint of all agent-to-agent transactions. This satisfies the requirement for recording key agentic decisions on-chain.
+
+-   **SettlerRegistry Address:** `0x33aE8331a2406EEc3A33483001aC5650DA2e0662`
+-   **Network:** Mantle Sepolia (Chain ID: 5003)
+-   **Functionality:** Anchors `AgentPaymentLogged` events including Agent IDs, Invoice IDs, and transaction metadata.
+
+### 🤖 ERC-8004: Trustless Agent Identity
+The gateway now implements the **ERC-8004** standard for decentralized agent identity and reputation. 
+-   **Identity Verification:** Intercepts x402 payments and validates the signer against the ERC-8004 Identity Registry.
+-   **Automated Reputation:** Upon successful payment settlement, the engine automatically posts positive trust signals to the Mantle-based Reputation Registry, closing the loop between financial action and trust.
+
+### 🏗️ CI/CD & Cloud Infrastructure
+To facilitate rapid iteration and verifiable builds, the project utilizes:
+-   **GitHub Container Registry (GHCR):** Automated builds published to `ghcr.io/nathfavour/settlerengine`.
+-   **Smart Pipelines:** GitHub Actions-driven CI/CD with layer caching and a `BUILD_ENABLED` toggle for cost-efficient iterations.
+
+### 🛠️ Hackathon Commands
+Execute a policy-protected payment on Mantle or other supported nets:
+```bash
+./settler pay -to <RECIPIENT> -amount <WEI> -key <AGENT_PRIVATE_KEY>
+```
+
+---
