@@ -21,8 +21,8 @@ const config: HardhatUserConfig = {
         network: "mantle-sepolia",
         chainId: 5003,
         urls: {
-          apiURL: "https://explorer.sepolia.mantle.xyz/api",
-          browserURL: "https://explorer.sepolia.mantle.xyz",
+          apiURL: "https://api-sepolia.mantlescan.xyz/api",
+          browserURL: "https://sepolia.mantlescan.xyz/",
         },
       },
     ],
