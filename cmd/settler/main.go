@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/nathfavour/settlerengine/internal/adapters/crypto/erc8004"
+	"github.com/nathfavour/settlerengine/internal/adapters/crypto/mantle"
 	"github.com/nathfavour/settlerengine/internal/domain"
 	"github.com/nathfavour/settlerengine/pkg/anyisland"
 	"github.com/nathfavour/settlerengine/pkg/crypto"
@@ -41,6 +43,8 @@ func main() {
 		runFacilitator(os.Args[2:])
 	case "pay":
 		runPay(os.Args[2:])
+	case "demo":
+		runDemo(os.Args[2:])
 	case "help":
 		printUsage()
 	default:
@@ -58,7 +62,73 @@ func printUsage() {
 	fmt.Println("  proxy        Start the x402 reverse proxy")
 	fmt.Println("  facilitator  Start the settlement facilitator daemon")
 	fmt.Println("  pay          Execute a policy-protected payment")
+	fmt.Println("  demo         Run a full agentic demo with Mantle on-chain anchoring")
 	fmt.Println("  help         Show this help message")
+}
+
+func runDemo(args []string) {
+	fmt.Println("🎬 Starting SettlerEngine Agentic Demo...")
+	
+	privKey := os.Getenv("PRIVATE_KEY")
+	if privKey == "" {
+		log.Fatal("❌ PRIVATE_KEY environment variable is required for demo")
+	}
+
+	// 1. ERC-8004 Identity Resolution
+	fmt.Println("🤖 [1/3] Resolving Agent Identity (ERC-8004)...")
+	registry, _ := erc8004.NewRegistryClient(
+		"https://rpc.sepolia.mantle.xyz",
+		common.HexToAddress("0x8004000000000000000000000000000000000001"),
+		common.HexToAddress("0x8004000000000000000000000000000000000002"),
+		common.HexToAddress("0x8004000000000000000000000000000000000003"),
+	)
+	
+	agentID := big.NewInt(42)
+	identity, _ := registry.ResolveAgent(context.Background(), agentID)
+	fmt.Printf("✅ Identity Verified: %s\n", identity.Metadata.Name)
+
+	// 2. Policy-Protected Payment Handshake
+	fmt.Println("💰 [2/3] Performing Policy-Protected Payment...")
+	max, _ := new(big.Int).SetString("1000000000000000000", 10)
+	policy := domain.NewPaymentPolicy("demo-policy", max, nil, time.Time{})
+	
+	amount := big.NewInt(1000)
+	recipient := common.HexToAddress("0x1234567890123456789012345678901234567890")
+	
+	if err := policy.Check(amount, recipient); err != nil {
+		log.Fatalf("❌ Policy Violation: %v", err)
+	}
+	fmt.Println("✅ Payment Approved by local guardrails.")
+
+	// 3. Mantle On-Chain Anchoring
+	fmt.Println("⚓ [3/3] Anchoring transaction to Mantle Sepolia...")
+	mantleClient, err := mantle.NewRegistryClient(
+		"https://rpc.sepolia.mantle.xyz",
+		common.HexToAddress("0x33aE8331a2406EEc3A33483001aC5650DA2e0662"),
+		big.NewInt(5003),
+	)
+	if err != nil {
+		log.Fatalf("❌ Failed to connect to Mantle: %v", err)
+	}
+
+	var agentBytes [32]byte
+	copy(agentBytes[:], agentID.Bytes())
+
+	txHash, err := mantleClient.LogPayment(
+		context.Background(),
+		privKey,
+		agentBytes,
+		big.NewInt(1337), // Demo Invoice ID
+		amount,
+		"Demo agent payment anchored via SettlerEngine",
+	)
+	if err != nil {
+		log.Fatalf("❌ On-chain anchoring failed: %v", err)
+	}
+
+	fmt.Printf("🚀 SUCCESS! On-chain footprint created.\n")
+	fmt.Printf("🔗 Transaction Hash: %s\n", txHash)
+	fmt.Printf("🌍 Explorer: https://explorer.sepolia.mantle.xyz/tx/%s\n", txHash)
 }
 
 func runPay(args []string) {
