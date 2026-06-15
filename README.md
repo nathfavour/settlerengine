@@ -48,10 +48,26 @@ docker run -p 8080:8080 settler-engine proxy -target http://host.docker.internal
 ```
 
 ### Anyisland
-If you use [Anyisland](https://github.com/anyisland), the engine is fully managed:
+If you use [Anyisland](https://github.com/anyisland), the engine is fully managed and can be installed with a single command:
 ```bash
 anyisland install github.com/nathfavour/settlerengine
 ```
+
+---
+
+## ⚙️ Configuration
+
+SettlerEngine supports interactive configuration to store RPC URLs, private keys, and registry addresses in your system's standard config directory.
+
+To start the setup wizard:
+```bash
+./settler config
+```
+
+This will store settings in:
+- **Linux**: `~/.config/settlerengine/config.json`
+- **macOS**: `~/Library/Application Support/settlerengine/config.json`
+- **Windows**: `%AppData%\settlerengine\config.json`
 
 ---
 
