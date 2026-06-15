@@ -117,4 +117,15 @@ Execute a policy-protected payment on Mantle or other supported nets:
 ./settler pay -to <RECIPIENT> -amount <WEI> -key <AGENT_PRIVATE_KEY>
 ```
 
+Run the full agentic demo (identity resolution -> policy check -> on-chain anchoring):
+```bash
+./settler demo
+```
+
+### 🔗 Proof of On-chain Activity (Mantle Sepolia)
+As proof of native integration and live agentic activity, several demo transactions have been anchored to Mantle Sepolia:
+
+-   **Agent Payment Logged:** [`0x7bfb4b8b93b6e4bbbc27248e3fb2d4ce7c5240f5eb8da8af57f992c1a1c8ac72`](https://explorer.sepolia.mantle.xyz/tx/0x7bfb4b8b93b6e4bbbc27248e3fb2d4ce7c5240f5eb8da8af57f992c1a1c8ac72)
+-   **SettlerRegistry Deployment:** [`0x33aE8331a2406EEc3A33483001aC5650DA2e0662`](https://explorer.sepolia.mantle.xyz/address/0x33aE8331a2406EEc3A33483001aC5650DA2e0662)
+
 ---
