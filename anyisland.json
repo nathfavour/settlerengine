@@ -7,7 +7,7 @@
   "build": {
     "toolchain": "go",
     "steps": [
-      "CGO_ENABLED=0 go build -v -o settlerengine ./cmd/settler"
+      "CGO_ENABLED=0 go build -v -o settlerengine ./cmd/settler/main.go"
     ],
     "bin": "settlerengine"
   },
