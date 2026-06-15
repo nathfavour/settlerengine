@@ -17,6 +17,7 @@ import (
 	"github.com/nathfavour/settlerengine/internal/adapters/crypto/mantle"
 	"github.com/nathfavour/settlerengine/internal/domain"
 	"github.com/nathfavour/settlerengine/pkg/anyisland"
+	"github.com/nathfavour/settlerengine/pkg/config"
 	"github.com/nathfavour/settlerengine/pkg/crypto"
 	"github.com/nathfavour/settlerengine/pkg/storage"
 	"github.com/nathfavour/settlerengine/pkg/uds"
@@ -46,6 +47,8 @@ func main() {
 		runPay(os.Args[2:])
 	case "demo":
 		runDemo(os.Args[2:])
+	case "config":
+		runConfig(os.Args[2:])
 	case "help":
 		printUsage()
 	default:
@@ -64,27 +67,72 @@ func printUsage() {
 	fmt.Println("  facilitator  Start the settlement facilitator daemon")
 	fmt.Println("  pay          Execute a policy-protected payment")
 	fmt.Println("  demo         Run a full agentic demo with Mantle on-chain anchoring")
+	fmt.Println("  config       Interactively configure SettlerEngine")
 	fmt.Println("  help         Show this help message")
+}
+
+func runConfig(args []string) {
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		// Default config if none exists
+		cfg = &config.SettlerConfig{
+			RPCURL:          "https://rpc.sepolia.mantle.xyz",
+			RegistryAddress: "0x33aE8331a2406EEc3A33483001aC5650DA2e0662",
+			AgentID:         "42",
+		}
+	}
+
+	cfg.Prompt()
+
+	if err := config.SaveConfig(cfg); err != nil {
+		log.Fatalf("❌ Failed to save config: %v", err)
+	}
+
+	path, _ := config.GetConfigPath()
+	fmt.Printf("✅ Configuration saved to: %s\n", path)
 }
 
 func runDemo(args []string) {
 	fmt.Println("🎬 Starting SettlerEngine Agentic Demo...")
 	
+	cfg, _ := config.LoadConfig()
+	if cfg == nil {
+		cfg = &config.SettlerConfig{}
+	}
+
 	privKey := os.Getenv("PRIVATE_KEY")
 	if privKey == "" {
-		log.Fatal("❌ PRIVATE_KEY environment variable is required for demo")
+		privKey = cfg.PrivateKey
 	}
+	if privKey == "" {
+		log.Fatal("❌ PRIVATE_KEY required (set env or run 'settler config')")
+	}
+
+	rpcURL := cfg.RPCURL
+	if rpcURL == "" {
+		rpcURL = "https://rpc.sepolia.mantle.xyz"
+	}
+
+	registryAddr := cfg.RegistryAddress
+	if registryAddr == "" {
+		registryAddr = "0x33aE8331a2406EEc3A33483001aC5650DA2e0662"
+	}
+
+	agentIDStr := cfg.AgentID
+	if agentIDStr == "" {
+		agentIDStr = "42"
+	}
+	agentID, _ := new(big.Int).SetString(agentIDStr, 10)
 
 	// 1. ERC-8004 Identity Resolution
 	fmt.Println("🤖 [1/3] Resolving Agent Identity (ERC-8004)...")
 	registry, _ := erc8004.NewRegistryClient(
-		"https://rpc.sepolia.mantle.xyz",
+		rpcURL,
 		common.HexToAddress("0x8004000000000000000000000000000000000001"),
 		common.HexToAddress("0x8004000000000000000000000000000000000002"),
 		common.HexToAddress("0x8004000000000000000000000000000000000003"),
 	)
 	
-	agentID := big.NewInt(42)
 	identity, _ := registry.ResolveAgent(context.Background(), agentID)
 	fmt.Printf("✅ Identity Verified: %s\n", identity.Metadata.Name)
 
@@ -104,8 +152,8 @@ func runDemo(args []string) {
 	// 3. Mantle On-Chain Anchoring
 	fmt.Println("⚓ [3/3] Anchoring transaction to Mantle Sepolia...")
 	mantleClient, err := mantle.NewRegistryClient(
-		"https://rpc.sepolia.mantle.xyz",
-		common.HexToAddress("0x33aE8331a2406EEc3A33483001aC5650DA2e0662"),
+		rpcURL,
+		common.HexToAddress(registryAddr),
 		big.NewInt(5003),
 	)
 	if err != nil {
