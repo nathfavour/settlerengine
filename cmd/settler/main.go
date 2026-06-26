@@ -263,6 +263,16 @@ func runProxy(args []string) {
 	}
 	defer udsServer.Close()
 
+	// 3. Load config for Casper facilitator details
+	localCfg, err := config.LoadConfig()
+	if err != nil {
+		log.Printf("⚠️  Could not load local config, using defaults: %v", err)
+		localCfg = &config.SettlerConfig{
+			CasperFacilitatorURL:   "https://x402-facilitator.cspr.cloud",
+			CasperFacilitatorToken: "",
+		}
+	}
+
 	targetURL, err := url.Parse(*target)
 	if err != nil {
 		log.Fatalf("Invalid target URL: %v", err)
@@ -286,11 +296,13 @@ func runProxy(args []string) {
 			ChainID:           parsedChainID,
 			VerifyingContract: common.HexToAddress("0x0000000000000000000000000000000000000000"),
 		},
-		NonceExpiry: 5 * time.Minute,
-		Recipient:   *recipient,
-		Asset:       *asset,
-		Amount:      *amount,
-		DB:          db,
+		NonceExpiry:            5 * time.Minute,
+		Recipient:              *recipient,
+		Asset:                  *asset,
+		Amount:                 *amount,
+		DB:                     db,
+		CasperFacilitatorURL:   localCfg.CasperFacilitatorURL,
+		CasperFacilitatorToken: localCfg.CasperFacilitatorToken,
 	}
 
 	mw := x402.NewMiddleware(cfg)

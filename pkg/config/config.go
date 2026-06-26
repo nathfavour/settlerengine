@@ -8,10 +8,12 @@ import (
 )
 
 type SettlerConfig struct {
-	RPCURL          string `json:"rpc_url"`
-	PrivateKey      string `json:"private_key"`
-	RegistryAddress string `json:"registry_address"`
-	AgentID         string `json:"agent_id"`
+	RPCURL                 string `json:"rpc_url"`
+	PrivateKey             string `json:"private_key"`
+	RegistryAddress        string `json:"registry_address"`
+	AgentID                string `json:"agent_id"`
+	CasperFacilitatorURL   string `json:"casper_facilitator_url"`
+	CasperFacilitatorToken string `json:"casper_facilitator_token"`
 }
 
 func GetConfigPath() (string, error) {
@@ -33,6 +35,20 @@ func LoadConfig() (*SettlerConfig, error) {
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			// Auto-initialize default config if it doesn't exist
+			defaultCfg := &SettlerConfig{
+				RPCURL:                 "https://rpc.sepolia.mantle.xyz",
+				RegistryAddress:        "0x33aE8331a2406EEc3A33483001aC5650DA2e0662",
+				AgentID:                "42",
+				CasperFacilitatorURL:   "https://x402-facilitator.cspr.cloud",
+				CasperFacilitatorToken: "", // empty/permissionless default
+			}
+			if err := SaveConfig(defaultCfg); err != nil {
+				return nil, err
+			}
+			return defaultCfg, nil
+		}
 		return nil, err
 	}
 	var cfg SettlerConfig
