@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,13 +32,14 @@ func (e *PaymentEngine) CloseSettlementLoop(ctx context.Context, invoiceID strin
 		return err
 	}
 
-	if success && e.registry != nil {
-		// In a real scenario, we would retrieve the AgentID associated with the invoice.
-		// For now, we'll simulate posting a positive feedback if it was an agentic payment.
+	if success && e.registry != nil && invoice.AgentID != "" {
 		fmt.Printf("🏆 ERC-8004: Closing settlement loop for invoice %s. Posting reputation update...\n", invoiceID)
 		
-		// Placeholder: Assume agent ID 42
-		agentID := big.NewInt(42)
+		agentID, ok := new(big.Int).SetString(invoice.AgentID, 10)
+		if !ok {
+			// Fallback to byte conversion if string conversion fails
+			agentID = new(big.Int).SetBytes([]byte(invoice.AgentID))
+		}
 		score := big.NewInt(1) // +1 point for successful settlement
 		_ = e.registry.PostFeedback(ctx, agentID, score, []string{"payment", "settled"}, "")
 	}

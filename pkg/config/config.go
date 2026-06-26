@@ -14,6 +14,7 @@ type SettlerConfig struct {
 	AgentID                string `json:"agent_id"`
 	CasperFacilitatorURL   string `json:"casper_facilitator_url"`
 	CasperFacilitatorToken string `json:"casper_facilitator_token"`
+	DemoMode               bool   `json:"demo_mode"`
 }
 
 func GetConfigPath() (string, error) {

@@ -138,10 +138,8 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 				if err == nil && recovered.Hex() != "" {
 					// 4a. ERC-8004 Trust Checks
 					if m.config.Registry != nil {
-						// For this demo, we assume the agent ID is passed or mapped from the recovered address.
-						// In reality, we'd lookup the tokenId owned by 'recovered'.
-						// Placeholder: assume tokenId 42
-						agentID := big.NewInt(42) 
+						// Resolve agentID dynamically from recovered address bytes
+						agentID := new(big.Int).SetBytes(recovered.Bytes())
 						
 						rep, err := m.config.Registry.GetReputation(r.Context(), agentID)
 						if err == nil && m.config.MinReputation != nil {
