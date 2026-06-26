@@ -6,4 +6,5 @@ use (
 	./apps/settlerd
 	./core
 	./pkg
+	./cmd/settler
 )

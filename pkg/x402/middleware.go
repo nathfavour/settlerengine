@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nathfavour/settlerengine/internal/ports"
 	"github.com/nathfavour/settlerengine/pkg/crypto"
+	"github.com/nathfavour/settlerengine/pkg/crypto/casper"
 	"github.com/nathfavour/settlerengine/pkg/storage"
 )
 
@@ -24,15 +25,17 @@ const (
 
 // Config defines the configuration for the x402 middleware.
 type Config struct {
-	DomainParams  crypto.DomainParams
-	NonceExpiry   time.Duration
-	Recipient     string
-	Asset         string
-	Amount        string
-	PriceResolver PriceResolver
-	DB            *storage.DB
-	Registry      ports.AgentRegistry
-	MinReputation *big.Int // Optional: block agents with score below this
+	DomainParams           crypto.DomainParams
+	NonceExpiry            time.Duration
+	Recipient              string
+	Asset                  string
+	Amount                 string
+	PriceResolver          PriceResolver
+	DB                     *storage.DB
+	Registry               ports.AgentRegistry
+	MinReputation          *big.Int // Optional: block agents with score below this
+	CasperFacilitatorURL   string
+	CasperFacilitatorToken string
 }
 
 // PriceResolver dynamically determines the payment requirements for a request.
@@ -40,9 +43,10 @@ type PriceResolver func(r *http.Request) (amount, asset, recipient string, err e
 
 // Middleware handles the x402 handshake.
 type Middleware struct {
-	config   Config
-	nonces   *NonceManager
-	verified sync.Map // Map of signature hash to Address
+	config       Config
+	nonces       *NonceManager
+	verified     sync.Map // Map of signature hash to Address
+	casperClient *casper.CasperFacilitatorClient
 }
 
 func NewMiddleware(cfg Config) *Middleware {
@@ -53,8 +57,9 @@ func NewMiddleware(cfg Config) *Middleware {
 	}
 
 	return &Middleware{
-		config: cfg,
-		nonces: NewNonceManager(),
+		config:       cfg,
+		nonces:       NewNonceManager(),
+		casperClient: casper.NewCasperFacilitatorClient(cfg.CasperFacilitatorURL, cfg.CasperFacilitatorToken),
 	}
 }
 
@@ -76,6 +81,38 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 		// 1. Try to parse payment header
 		payload, err := ParseHeader(r)
 		if err == nil {
+			// Check if we are running in Casper mode (either explicitly marked, or chain-id is casper-testnet)
+			isCasper := payload.Scheme == "casper-native" || 
+				m.config.DomainParams.ChainID != nil && m.config.DomainParams.ChainID.String() == "0" && m.config.Asset == "CSPR" ||
+				payload.Intent.Asset == "CSPR"
+
+			if isCasper {
+				// Verify via Casper Facilitator
+				details := casper.PaymentDetails{
+					Recipient: m.config.Recipient,
+					Amount:    m.config.Amount,
+					Asset:     "CSPR",
+					Nonce:     payload.Intent.Nonce,
+					Network:   "casper-testnet",
+				}
+				if details.Nonce == "" {
+					details.Nonce = "demo-nonce"
+				}
+
+				valid, err := m.casperClient.VerifyPayload(payload.Signature, details)
+				if err == nil && valid {
+					// Auto settle/forward payment via facilitator
+					txHash, err := m.casperClient.SettlePayload(payload.Signature, details)
+					if err == nil && txHash != "" {
+						fmt.Printf("✅ Casper Facilitator: Verified and settled transaction: %s\n", txHash)
+						// Store dummy address for signer in context for downstream handlers
+						ctx := context.WithValue(r.Context(), SignerContextKey, common.HexToAddress("0x0"))
+						next.ServeHTTP(w, r.WithContext(ctx))
+						return
+					}
+				}
+			}
+
 			// 2. Check Cache & DB (Idempotency)
 			if addr, ok := m.verified.Load(payload.Signature); ok {
 				ctx := context.WithValue(r.Context(), SignerContextKey, addr.(common.Address))
@@ -144,6 +181,20 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 		}
 
 		nonce, _ := m.nonces.Generate(m.config.NonceExpiry)
+
+		// Set the Payment-Required header formatted for Casper native agents
+		casperChallenge := map[string]interface{}{
+			"accepts": []map[string]interface{}{
+				{
+					"scheme":    "casper-native",
+					"networkId": "casper-testnet",
+					"amount":    amount,
+					"recipient": recipient,
+				},
+			},
+		}
+		challengeBytes, _ := json.Marshal(casperChallenge)
+		w.Header().Set(HeaderPaymentRequired, string(challengeBytes))
 
 		resp := ChallengeResponse{
 			Status:      http.StatusPaymentRequired,

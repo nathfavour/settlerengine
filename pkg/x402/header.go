@@ -11,12 +11,14 @@ import (
 const (
 	HeaderPayment          = "X-Payment"
 	HeaderPaymentSignature = "X-Payment-Signature"
+	HeaderPaymentRequired  = "Payment-Required"
 )
 
 // PaymentPayload represents the data extracted from the payment header.
 type PaymentPayload struct {
 	Intent    crypto.IntentToPay `json:"intent"`
 	Signature string             `json:"signature"`
+	Scheme    string             `json:"scheme,omitempty"`
 }
 
 // ParseHeader extracts and decodes the payment information from a request.
@@ -30,9 +32,14 @@ func ParseHeader(r *http.Request) (*PaymentPayload, error) {
 		return &payload, nil
 	}
 
-	// Fallback to separate signature header (simplified version)
-	// This would require the intent to be reconstructible or passed elsewhere.
-	// For MVP, we'll focus on the self-contained JSON payload.
+	// Fallback to separate signature header (X-Payment-Signature)
+	if sig := r.Header.Get(HeaderPaymentSignature); sig != "" {
+		// Attempt to reconstruct or build a minimal payload using URL query parameters or default headers.
+		return &PaymentPayload{
+			Signature: sig,
+			Scheme:    "casper-native",
+		}, nil
+	}
 	
 	return nil, fmt.Errorf("no payment header found")
 }

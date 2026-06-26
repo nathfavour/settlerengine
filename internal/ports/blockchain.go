@@ -14,6 +14,7 @@ const (
 	NetworkMonero   ChainNetwork = "XMR"
 	NetworkSolana   ChainNetwork = "SOL"
 	NetworkTron     ChainNetwork = "TRX"
+	NetworkCasper   ChainNetwork = "CSPR"
 )
 
 type InvoicePaymentSignal struct {
