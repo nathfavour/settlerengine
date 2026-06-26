@@ -97,7 +97,12 @@ func runDemo(args []string) {
 	useCasper := fs.Bool("casper", false, "Simulate Casper agent payment verification loop")
 	fs.Parse(args)
 
-	if *useCasper {
+	cfg, _ := config.LoadConfig()
+	if cfg == nil {
+		cfg = &config.SettlerConfig{}
+	}
+
+	if *useCasper || cfg.DemoMode {
 		fmt.Println("🎬 Starting SettlerEngine Agentic Demo (Casper-Native Mode)...")
 		fmt.Println("🤖 [1/3] Generating Casper Ed25519 mock signer parameters...")
 		mockSig := "dGVzdC1zaWduYXR1cmUtYmFzZTY0" // base64 payload "test-signature-base64"
@@ -117,7 +122,7 @@ func runDemo(args []string) {
 
 	fmt.Println("🎬 Starting SettlerEngine Agentic Demo...")
 	
-	cfg, _ := config.LoadConfig()
+	cfg, _ = config.LoadConfig()
 	if cfg == nil {
 		cfg = &config.SettlerConfig{}
 	}
